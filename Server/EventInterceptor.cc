@@ -19,8 +19,8 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	this->eventMode = eventMode;
 	this->eventType = eventType;
 	eventId = getHash();
-	filename = "raft-" + std::to_string(eventId);
 	fileDir = getRPCDIR();
+	filename = createFilename();
 
 	std::string newFileName = fileDir + "/new/" + filename;
 	file.open(newFileName.c_str());
@@ -30,6 +30,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	file << "eventType=" << this->eventType << std::endl;
 	file << "sendNodeState=" << myState << std::endl;
 	file << "sendNodeStateInt=" << myStateInt << std::endl;
+	file << "hashId=" << eventId << std::endl;
 	file.close();
 
 	commitEvent();
@@ -69,7 +70,7 @@ void EventInterceptor::commitEvent(){
 
 void EventInterceptor::waitAck(){
 	// wait for ack msg
-	std::string ackFileName = fileDir + "/ack/" + std::to_string(eventId);
+	std::string ackFileName = fileDir + "/ack/" + filename;
 	std::ifstream ackFile(ackFileName.c_str());
 	try{
 		while(!ackFile.good()) {
@@ -81,7 +82,7 @@ void EventInterceptor::waitAck(){
 			}
 		}
 	} catch(int e){
-		NOTICE("[Jef] Exception: %d", eventId);
+		NOTICE("[Jef] Exception on waiting : %s", filename.c_str());
 	}
 
 	// read message file if needed
@@ -92,10 +93,10 @@ void EventInterceptor::waitAck(){
 		}
 		ackFile.close();
 	}
-	NOTICE("[Jef] ack file %s/ack/%d %s", fileDir.c_str(), eventId, ackMessage.c_str());
+	NOTICE("[Jef] ack file %s/ack/%s %s", fileDir.c_str(), filename.c_str(), ackMessage.c_str());
 
 	// remove ack file
-	std::string rmFile = "rm " + fileDir + "/ack/" + std::to_string(eventId);
+	std::string rmFile = "rm " + fileDir + "/ack/" + filename;
 	const int rmfile_err = system(rmFile.c_str());
 	if (-1 == rmfile_err){
 		printf("Error deleting the file\n");
@@ -144,6 +145,22 @@ std::string EventInterceptor::getRPCDIR(){
 		configFile.close();
 	}
 	return inputs.substr(prefix.size());
+}
+
+std::string EventInterceptor::createFilename(){
+	int count = 0;
+	std::string filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
+	std::string filePath = fileDir + "/new/" + filename;
+	std::string filePath2 = fileDir + "/new/" + filename;
+	std::ifstream file(filePath.c_str());
+	std::ifstream file2(filePath2.c_str());
+	while(file.good() || file2.good()) {
+		count++;
+		filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
+		filePath = fileDir + "/new/" + filename;
+		file.open(filePath.c_str());
+	}
+	return filename;
 }
 
 int EventInterceptor::getHash(){

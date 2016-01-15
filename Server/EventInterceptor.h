@@ -25,6 +25,7 @@ private:
 	void updateState();
 	std::string getStateString(int state);
 	std::string getRPCDIR();
+	std::string createFilename();
 	int getHash();
 
 public:
