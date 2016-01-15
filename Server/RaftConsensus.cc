@@ -44,9 +44,9 @@
 #include <string>
 #include <iostream>
 
-#include <xmlrpc-c/girerr.hpp>
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/client_simple.hpp>
+//#include <xmlrpc-c/girerr.hpp>
+//#include <xmlrpc-c/base.hpp>
+//#include <xmlrpc-c/client_simple.hpp>
 
 #define PATH_SEPARATOR ':'
 
