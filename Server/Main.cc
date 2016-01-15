@@ -281,7 +281,6 @@ main(int argc, char** argv)
 
         // Parse command line args.
         OptionParser options(argc, argv);
-
         if (options.testConfig) {
             Server::Globals globals;
             globals.config.readFile(options.configFilename.c_str());
@@ -302,7 +301,7 @@ main(int argc, char** argv)
             }
         }
 
-        NOTICE("Using config file %s", options.configFilename.c_str());
+        NOTICE("jef-1 Using config file %s", options.configFilename.c_str());
 
         // Detach as daemon
         if (options.daemon) {
@@ -338,17 +337,23 @@ main(int argc, char** argv)
                 Core::Debug::logPolicyFromString(
                     globals.config.read<std::string>("logPolicy", "NOTICE")));
 
-            NOTICE("Config file settings:\n"
+            NOTICE("jef-2 Config file settings:\n"
                    "# begin config\n"
                    "%s"
                    "# end config",
                    Core::StringUtil::toString(globals.config).c_str());
+
+            // jef : it's going to initialized the globals (everything)
             globals.init();
+
+        	// jef : bootstrap the node and put a log if the node has done configurating the bootstrap
+            // if it's not a bootstrap, then let's run the globals..!
             if (options.bootstrap) {
                 globals.raft->bootstrapConfiguration();
                 NOTICE("Done bootstrapping configuration. Exiting.");
             } else {
                 globals.leaveSignalsBlocked();
+                // jef : run the never ending loop
                 globals.run();
             }
         }

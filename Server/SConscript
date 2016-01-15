@@ -9,6 +9,8 @@ src = [
     "RaftService.cc",
     "ServerStats.cc",
     "StateMachine.cc",
+    "JNICaller.cc",
+    "EventInterceptor.cc"
 ]
 object_files['Server'] = (env.StaticObject(src) +
                           env.Protobuf("SnapshotMetadata.proto") +

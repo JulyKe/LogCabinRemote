@@ -40,6 +40,16 @@
 #include "Server/Globals.h"
 #include "Storage/LogFactory.h"
 
+#include <cstdlib>
+#include <string>
+#include <iostream>
+
+#include <xmlrpc-c/girerr.hpp>
+#include <xmlrpc-c/base.hpp>
+#include <xmlrpc-c/client_simple.hpp>
+
+#define PATH_SEPARATOR ':'
+
 namespace LogCabin {
 namespace Server {
 
@@ -48,6 +58,10 @@ typedef Storage::Log Log;
 namespace RaftConsensusInternal {
 
 bool startThreads = true;
+
+// jef : hack election policy
+bool startElection = true;
+uint64_t lastMsgType = 4;
 
 ////////// Server //////////
 
@@ -265,7 +279,7 @@ Peer::CallStatus
 Peer::callRPC(Protocol::Raft::OpCode opCode,
               const google::protobuf::Message& request,
               google::protobuf::Message& response,
-              std::unique_lock<Mutex>& lockGuard)
+              std::unique_lock<Mutex>& lockGuard, uint64_t sendNode)
 {
     typedef RPC::ClientRPC::Status RPCStatus;
     rpc = RPC::ClientRPC(getSession(lockGuard),
@@ -278,7 +292,7 @@ Peer::callRPC(Protocol::Raft::OpCode opCode,
     switch (rpc.waitForReply(&response, NULL, TimePoint::max())) {
         case RPCStatus::OK:
             if (rpcFailuresSinceLastWarning > 0) {
-                WARNING("RPC to server succeeded after %lu failures",
+                WARNING("jef-21 RPC to server succeeded after %lu failures",
                         rpcFailuresSinceLastWarning);
                 rpcFailuresSinceLastWarning = 0;
             }
@@ -290,7 +304,7 @@ Peer::callRPC(Protocol::Raft::OpCode opCode,
         case RPCStatus::RPC_FAILED:
             ++rpcFailuresSinceLastWarning;
             if (rpcFailuresSinceLastWarning == 1) {
-                WARNING("RPC to server failed: %s",
+                WARNING("jef-16 RPC to server failed: %s",
                         rpc.getErrorMessage().c_str());
             } else if (rpcFailuresSinceLastWarning % 100 == 0) {
                 WARNING("Last %lu RPCs to server failed. This failure: %s",
@@ -314,7 +328,7 @@ Peer::startThread(std::shared_ptr<Peer> self)
     thisCatchUpIterationStart = Clock::now();
     thisCatchUpIterationGoalId = consensus.log->getLastLogIndex();
     ++consensus.numPeerThreads;
-    NOTICE("Starting peer thread for server %lu", serverId);
+    NOTICE("jef-9 Starting peer thread for server %lu", serverId);
     std::thread(&RaftConsensus::peerThreadMain, &consensus, self).detach();
 }
 
@@ -580,7 +594,7 @@ Configuration::setConfiguration(
         uint64_t newId,
         const Protocol::Raft::Configuration& newDescription)
 {
-    NOTICE("Activating configuration %lu:\n%s", newId,
+    NOTICE("jef-8 Activating configuration %lu:\n%s", newId,
            Core::ProtoBuf::dumpString(newDescription).c_str());
 
     if (newDescription.next_configuration().servers().size() == 0)
@@ -934,7 +948,9 @@ RaftConsensus::RaftConsensus(Globals& globals)
         std::chrono::milliseconds(
             globals.config.read<uint64_t>(
                 "electionTimeoutMilliseconds",
-                500)))
+                  // jef : hack election policy
+//                500)))
+            	  20000)))
     , HEARTBEAT_PERIOD(
         globals.config.keyExists("heartbeatPeriodMilliseconds")
             ? std::chrono::nanoseconds(
@@ -995,6 +1011,7 @@ RaftConsensus::RaftConsensus(Globals& globals)
     , stateMachineUpdaterThread()
     , stepDownThread()
     , invariants(*this)
+	, msgSending(0) // jef : send msg to dmck
 {
 }
 
@@ -1037,7 +1054,7 @@ RaftConsensus::init()
     }
 #endif
 
-    NOTICE("My server ID is %lu", serverId);
+    NOTICE("jef-4 My server ID is %lu", serverId);
 
     if (storageLayout.topDir.fd == -1) {
         if (globals.config.read("use-temporary-storage", false))
@@ -1049,7 +1066,7 @@ RaftConsensus::init()
     configuration.reset(new Configuration(serverId, *this));
     configurationManager.reset(new ConfigurationManager(*configuration));
 
-    NOTICE("Reading the log");
+    NOTICE("jef-5 Reading the log");
     if (!log) { // some unit tests pre-set the log; don't overwrite it
         log = Storage::LogFactory::makeLog(globals.config, storageLayout);
     }
@@ -1073,7 +1090,7 @@ RaftConsensus::init()
             log->getEntry(log->getLastLogIndex()).cluster_time());
     }
 
-    NOTICE("The log contains indexes %lu through %lu (inclusive)",
+    NOTICE("jef-10 The log contains indexes %lu through %lu (inclusive)",
            log->getLogStartIndex(), log->getLastLogIndex());
 
     if (log->metadata.has_current_term())
@@ -1094,6 +1111,7 @@ RaftConsensus::init()
     if (configuration->id == 0)
         NOTICE("No configuration, waiting to receive one.");
 
+    // jef : start as a FOLLOWER
     stepDown(currentTerm);
     if (RaftConsensusInternal::startThreads) {
         leaderDiskThread = std::thread(
@@ -1291,7 +1309,7 @@ RaftConsensus::handleAppendEntries(
         return; // response was set to a rejection above
     }
     if (request.term() > currentTerm) {
-        NOTICE("Received AppendEntries request from server %lu in term %lu "
+        NOTICE("jef-20 Received AppendEntries request from server %lu in term %lu "
                "(this server's term was %lu)",
                 request.server_id(), request.term(), currentTerm);
         // We're about to bump our term in the stepDown below: update
@@ -1542,7 +1560,7 @@ RaftConsensus::handleRequestVote(
     }
 
     if (request.term() > currentTerm) {
-        NOTICE("Received RequestVote request from server %lu in term %lu "
+        NOTICE("jef-18 Received RequestVote request from server %lu in term %lu "
                "(this server's term was %lu)",
                 request.server_id(), request.term(), currentTerm);
         stepDown(request.term());
@@ -1555,7 +1573,7 @@ RaftConsensus::handleRequestVote(
     if (request.term() == currentTerm) {
         if (logIsOk && votedFor == 0) {
             // Give caller our vote
-            NOTICE("Voting for %lu in term %lu",
+            NOTICE("jef-29 Voting for %lu in term %lu",
                    request.server_id(), currentTerm);
             stepDown(currentTerm);
             setElectionTimer();
@@ -1697,14 +1715,14 @@ RaftConsensus::setConfiguration(
     // Wait until the configuration that removes the old servers has been
     // committed. This is the first configuration with ID greater than
     // transitionalId.
-    NOTICE("Waiting for stable configuration to commit");
+    NOTICE("jef-40 Waiting for stable configuration to commit");
     while (true) {
         // Check this first: if the new configuration excludes us so we've
         // stepped down upon committing it, we still want to return success.
         if (configuration->id > transitionalId &&
             commitIndex >= configuration->id) {
             response.mutable_ok();
-            NOTICE("Stable configuration committed. Configuration change "
+            NOTICE("jef-41 Stable configuration committed. Configuration change "
                    "completed successfully");
             return ClientResult::SUCCESS;
         }
@@ -1926,6 +1944,12 @@ operator<<(std::ostream& os, const RaftConsensus& raft)
     return os;
 }
 
+// jef : send message to dmck
+void
+RaftConsensus::resetSending(){
+	msgSending = 0;
+}
+
 
 //// RaftConsensus private methods that MUST acquire the lock
 
@@ -1999,7 +2023,7 @@ RaftConsensus::stateMachineUpdaterThreadMain()
                 // Do nothing until we have info from everyone else
                 // (stateChanged will be notified). The backoff is here just to
                 // avoid spamming the NOTICE message.
-                NOTICE("Waiting to receive state machine supported version "
+                NOTICE("jef-24 Waiting to receive state machine supported version "
                        "information from all peers (missing %lu of %lu)",
                        s.missingCount, s.allCount);
                 backoffUntil = now + STATE_MACHINE_UPDATER_BACKOFF;
@@ -2051,7 +2075,11 @@ RaftConsensus::timerThreadMain()
     std::unique_lock<Mutex> lockGuard(mutex);
     Core::ThreadId::setName("startNewElection");
     while (!exiting) {
-        if (Clock::now() >= startElectionAt)
+    	// jef : hack election policy
+    	if (RaftConsensusInternal::startElection){
+        	RaftConsensusInternal::startElection = false;
+            startNewElection();
+    	} else if (Clock::now() >= startElectionAt)
             startNewElection();
         stateChanged.wait_until(lockGuard, startElectionAt);
     }
@@ -2063,7 +2091,7 @@ RaftConsensus::peerThreadMain(std::shared_ptr<Peer> peer)
     std::unique_lock<Mutex> lockGuard(mutex);
     Core::ThreadId::setName(
         Core::StringUtil::format("Peer(%lu)", peer->serverId));
-    NOTICE("Peer thread for server %lu started", peer->serverId);
+    NOTICE("jef-13 Peer thread for server %lu started", peer->serverId);
 
     // Each iteration of this loop issues a new RPC or sleeps on the condition
     // variable.
@@ -2076,20 +2104,20 @@ RaftConsensus::peerThreadMain(std::shared_ptr<Peer> peer)
         } else {
             switch (state) {
                 // Followers don't issue RPCs.
-                case State::FOLLOWER:
+                case State::FOLLOWER: // jef : 0
                     waitUntil = TimePoint::max();
                     break;
 
                 // Candidates request votes.
-                case State::CANDIDATE:
-                    if (!peer->requestVoteDone)
+                case State::CANDIDATE: // jef : 1
+                    if (!peer->requestVoteDone){
                         requestVote(lockGuard, *peer);
-                    else
+                    } else
                         waitUntil = TimePoint::max();
                     break;
 
                 // Leaders replicate entries and periodically send heartbeats.
-                case State::LEADER:
+                case State::LEADER: // jef : 2
                     if (peer->getMatchIndex() < log->getLastLogIndex() ||
                         peer->nextHeartbeatTime < now) {
                         // appendEntries delegates to installSnapshot if we
@@ -2149,7 +2177,7 @@ RaftConsensus::stepDownThreadMain()
             if (configuration->quorumMin(&Server::getLastAckEpoch) >= epoch)
                 break;
             if (Clock::now() >= stepDownAt) {
-                NOTICE("No broadcast for a timeout, stepping down from leader "
+                NOTICE("jef-28 No broadcast for a timeout, stepping down from leader "
                        "of term %lu (converting to follower in term %lu)",
                        currentTerm, currentTerm + 1);
                 stepDown(currentTerm + 1);
@@ -2280,10 +2308,19 @@ RaftConsensus::appendEntries(std::unique_lock<Mutex>& lockGuard,
     Protocol::Raft::AppendEntries::Response response;
     TimePoint start = Clock::now();
     uint64_t epoch = currentEpoch;
+
+    // jef : send message type-2 to dmck
+    msgSending += 1;
+    Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
+    EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
+    		Protocol::Raft::OpCode::APPEND_ENTRIES, msgSending);
+
+    std::unique_lock<Mutex> secondLockGuard(mutex);
     Peer::CallStatus status = peer.callRPC(
                 Protocol::Raft::OpCode::APPEND_ENTRIES,
                 request, response,
-                lockGuard);
+//                lockGuard, serverId);
+                secondLockGuard, serverId);
     switch (status) {
         case Peer::CallStatus::OK:
             break;
@@ -2339,6 +2376,8 @@ RaftConsensus::appendEntries(std::unique_lock<Mutex>& lockGuard,
                 if (labs(int64_t(peer.lastCatchUpIterationMs -
                                  thisCatchUpIterationMs)) * 1000L * 1000L <
                     std::chrono::nanoseconds(ELECTION_TIMEOUT).count()) {
+                	// Jef : Message Timing
+//                    std::chrono::milliseconds(ELECTION_TIMEOUT).count()) {
                     peer.isCaughtUp_ = true;
                     stateChanged.notify_all();
                 } else {
@@ -2419,10 +2458,19 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
     Protocol::Raft::InstallSnapshot::Response response;
     TimePoint start = Clock::now();
     uint64_t epoch = currentEpoch;
+
+    // jef : send message-3 to dmck
+    msgSending += 1;
+    Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
+    EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
+        		Protocol::Raft::OpCode::INSTALL_SNAPSHOT, msgSending);
+    std::unique_lock<Mutex> secondLockGuard(mutex);
+
     Peer::CallStatus status = peer.callRPC(
                 Protocol::Raft::OpCode::INSTALL_SNAPSHOT,
                 request, response,
-                lockGuard);
+//                lockGuard, serverId);
+                secondLockGuard, serverId);
     switch (status) {
         case Peer::CallStatus::OK:
             break;
@@ -2485,10 +2533,14 @@ void
 RaftConsensus::becomeLeader()
 {
     assert(state == State::CANDIDATE);
-    NOTICE("Now leader for term %lu (appending no-op at index %lu)",
+    NOTICE("jef-23 Now leader for term %lu (appending no-op at index %lu)",
            currentTerm,
            log->getLastLogIndex() + 1);
     state = State::LEADER;
+
+    // jef: update state to dmck
+    EventInterceptor update(serverId, (int)state);
+
     leaderId = serverId;
     printElectionState();
     startElectionAt = TimePoint::max();
@@ -2631,7 +2683,7 @@ RaftConsensus::readSnapshot()
         try {
             reader.reset(new Storage::SnapshotFile::Reader(storageLayout));
         } catch (const std::runtime_error& e) { // file not found
-            NOTICE("%s", e.what());
+            NOTICE("jef-11 %s", e.what());
         }
     }
     if (reader) {
@@ -2753,6 +2805,7 @@ RaftConsensus::replicateEntry(Log::Entry& entry,
 void
 RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
 {
+	NOTICE("Request Vote for %lu starts with term %lu", serverId, currentTerm);
     Protocol::Raft::RequestVote::Request request;
     request.set_server_id(serverId);
     request.set_term(currentTerm);
@@ -2763,10 +2816,20 @@ RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
     VERBOSE("requestVote start");
     TimePoint start = Clock::now();
     uint64_t epoch = currentEpoch;
+
+
+    // jef : send message-1 to dmck
+    msgSending += 1;
+	Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
+    EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
+            		Protocol::Raft::OpCode::REQUEST_VOTE, msgSending);
+	std::unique_lock<Mutex> secondLockGuard(mutex);
+
     Peer::CallStatus status = peer.callRPC(
                 Protocol::Raft::OpCode::REQUEST_VOTE,
                 request, response,
-                lockGuard);
+//                lockGuard, serverId);
+                secondLockGuard, serverId);
     VERBOSE("requestVote done");
     switch (status) {
         case Peer::CallStatus::OK:
@@ -2788,7 +2851,7 @@ RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
     }
 
     if (response.term() > currentTerm) {
-        NOTICE("Received RequestVote response from server %lu in "
+        NOTICE("jef-27 Received RequestVote response from server %lu in "
                "term %lu (this server's term was %lu)",
                 peer.serverId, response.term(), currentTerm);
         stepDown(response.term());
@@ -2799,13 +2862,16 @@ RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
 
         if (response.granted()) {
             peer.haveVote_ = true;
-            NOTICE("Got vote from server %lu for term %lu",
+            NOTICE("jef-22 Got vote from server %lu for term %lu",
                    peer.serverId, currentTerm);
             if (configuration->quorumAll(&Server::haveVote))
                 becomeLeader();
         } else {
-            NOTICE("Vote denied by server %lu for term %lu",
-                   peer.serverId, currentTerm);
+            NOTICE("jef-26 Vote denied by server %lu for term %lu because peer term is %lu",
+                   peer.serverId, currentTerm, response.term());
+            // jef : hack election policy
+            --currentTerm;
+            stepDown(currentTerm);
         }
     }
 }
@@ -2813,11 +2879,19 @@ RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
 void
 RaftConsensus::setElectionTimer()
 {
-    std::chrono::nanoseconds duration(
-        Core::Random::randomRange(
-            uint64_t(std::chrono::nanoseconds(ELECTION_TIMEOUT).count()),
-            uint64_t(std::chrono::nanoseconds(ELECTION_TIMEOUT).count()) * 2));
-    VERBOSE("Will become candidate in %s",
+    // jef : hack election policy
+//    std::chrono::nanoseconds duration(
+    std::chrono::milliseconds duration(
+//    		uint64_t(std::chrono::nanoseconds(ELECTION_TIMEOUT).count()));
+    		uint64_t(std::chrono::milliseconds(ELECTION_TIMEOUT).count()));
+        	// Jef : Message Timing - don't make it random
+//        Core::Random::randomRange(
+//            uint64_t(std::chrono::nanoseconds(ELECTION_TIMEOUT).count()),
+//            uint64_t(std::chrono::nanoseconds(ELECTION_TIMEOUT).count()) * 2));
+//        	uint64_t(std::chrono::milliseconds(ELECTION_TIMEOUT).count()),
+//        	uint64_t(std::chrono::milliseconds(ELECTION_TIMEOUT).count()) * 2));
+//    VERBOSE("Will become candidate in %s",
+    NOTICE("Will become candidate in %s",
             Core::StringUtil::toString(duration).c_str());
     startElectionAt = Clock::now() + duration;
     stateChanged.notify_all();
@@ -2838,7 +2912,7 @@ RaftConsensus::printElectionState() const
             s = "LEADER,   ";
             break;
     }
-    NOTICE("server=%lu, term=%lu, state=%s leader=%lu, vote=%lu",
+    NOTICE("jef-12 server=%lu, term=%lu, state=%s leader=%lu, vote=%lu",
            serverId,
            currentTerm,
            s,
@@ -2849,6 +2923,9 @@ RaftConsensus::printElectionState() const
 void
 RaftConsensus::startNewElection()
 {
+	// jef : intercept start new election event-0
+	EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, 2);
+
     if (configuration->id == 0) {
         // Don't have a configuration: go back to sleep.
         setElectionTimer();
@@ -2856,21 +2933,25 @@ RaftConsensus::startNewElection()
     }
 
     if (leaderId > 0) {
-        NOTICE("Running for election in term %lu "
+        NOTICE("jef-42 Running for election in term %lu "
                "(haven't heard from leader %lu lately)",
                currentTerm + 1,
                leaderId);
     } else if (state == State::CANDIDATE) {
-        NOTICE("Running for election in term %lu "
+        NOTICE("jef-17 Running for election in term %lu "
                "(previous candidacy for term %lu timed out)",
                currentTerm + 1,
                currentTerm);
     } else {
-        NOTICE("Running for election in term %lu",
+        NOTICE("jef-15 Running for election in term %lu",
                currentTerm + 1);
     }
     ++currentTerm;
     state = State::CANDIDATE;
+
+    // jef: update state to dmck
+    EventInterceptor update(serverId, (int)state);
+
     leaderId = 0;
     votedFor = serverId;
     printElectionState();
@@ -2904,10 +2985,18 @@ RaftConsensus::stepDown(uint64_t newTerm)
             snapshotWriter.reset();
         }
         state = State::FOLLOWER;
+
+        // jef: update state to dmck
+        EventInterceptor update(serverId, (int)state);
+
         printElectionState();
     } else {
         if (state != State::FOLLOWER) {
             state = State::FOLLOWER;
+
+            // jef: update state to dmck
+            EventInterceptor update(serverId, (int)state);
+
             printElectionState();
         }
     }

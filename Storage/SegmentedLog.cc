@@ -352,7 +352,8 @@ SegmentedLog::SegmentedLog(const FS::File& parentDir,
                                              8 * 1024 * 1024))
     , shouldCheckInvariants(config.read<bool>("storageDebug", false))
     , diskWriteDurationThreshold(config.read<uint64_t>(
-        "electionTimeoutMilliseconds", 500) / 4)
+//        "electionTimeoutMilliseconds", 500) / 4)
+    		"electionTimeoutMilliseconds", 500) / 40)
     , metadata()
     , dir(FS::openDir(parentDir,
                       (encoding == Encoding::BINARY
@@ -773,7 +774,7 @@ SegmentedLog::updateMetadata()
 
     TimePoint start = Clock::now();
 
-    NOTICE("Writing new storage metadata (version %lu) to %s",
+    NOTICE("jef-7 Writing new storage metadata (version %lu) to %s",
            metadata.version(),
            filename.c_str());
     FS::File file = FS::openFile(dir, filename, O_CREAT|O_WRONLY|O_TRUNC);
@@ -894,7 +895,7 @@ SegmentedLog::readMetadata(const std::string& filename,
                   filename.c_str(),
                   metadata.format_version());
         }
-        NOTICE("Read metadata version %lu from %s",
+        NOTICE("jef-6 Read metadata version %lu from %s",
                metadata.version(), filename.c_str());
         return true;
     } else {

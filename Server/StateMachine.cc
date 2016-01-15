@@ -363,7 +363,7 @@ StateMachine::apply(const RaftConsensus::Entry& entry)
                       runningVersion,
                       MAX_SUPPORTED_VERSION);
             } else {
-                NOTICE("Upgrading state machine to version %u (from %u)",
+                NOTICE("jef-25 Upgrading state machine to version %u (from %u)",
                        requested,
                        runningVersion);
                 versionHistory.insert({entry.index, requested});
@@ -603,7 +603,7 @@ StateMachine::shouldTakeSnapshot(uint64_t lastIncludedIndex) const
     uint64_t logEntries = stats.last_log_index() - stats.last_snapshot_index();
     if (curr != logEntries &&
         10 * prev / logEntries != 10 * curr / logEntries) {
-        NOTICE("Have applied %lu%% of the %lu total log entries",
+        NOTICE("jef-14 Have applied %lu%% of the %lu total log entries",
                100 * curr / logEntries,
                logEntries);
     }

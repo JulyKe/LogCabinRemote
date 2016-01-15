@@ -155,6 +155,7 @@ int
 main(int argc, char** argv)
 {
     try {
+    	printf("test printf - 1");
 
         OptionParser options(argc, argv);
         LogCabin::Client::Debug::setLogPolicy(

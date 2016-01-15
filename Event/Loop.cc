@@ -124,6 +124,7 @@ void
 Loop::runForever()
 {
     while (true) {
+
         { // Handle Loop::Lock requests and exiting.
             std::unique_lock<std::mutex> lockGuard(mutex);
             runningThread = Core::ThreadId::NONE;
@@ -138,6 +139,7 @@ Loop::runForever()
             }
             runningThread = Core::ThreadId::getId();
         }
+
         std::unique_lock<decltype(extraMutexToSatisfyRaceDetector)>
             extraLockGuard(extraMutexToSatisfyRaceDetector);
 
@@ -151,13 +153,15 @@ Loop::runForever()
         // this could cause trouble.
         enum { NUM_EVENTS = 1 };
         struct epoll_event events[NUM_EVENTS];
+
+    	// jef : if we forget to reconfigure, the loop will stuck here
         int r = epoll_wait(epollfd, events, NUM_EVENTS, -1);
         if (r <= 0) {
             if (errno == EINTR) // caused by GDB
                 continue;
             PANIC("epoll_wait failed: %s", strerror(errno));
         }
-        for (int i = 0; i < r; ++i) {
+    	for (int i = 0; i < r; ++i) {
             Event::File& file = *static_cast<Event::File*>(events[i].data.ptr);
             file.handleFileEvent(events[i].events);
         }

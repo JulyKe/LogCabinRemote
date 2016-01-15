@@ -35,6 +35,9 @@
 #include "Storage/Log.h"
 #include "Storage/SnapshotFile.h"
 
+#include "Server/EventInterceptor.h"
+
+
 #ifndef LOGCABIN_SERVER_RAFTCONSENSUS_H
 #define LOGCABIN_SERVER_RAFTCONSENSUS_H
 
@@ -213,6 +216,7 @@ class Server {
      * Used internally by Configuration for garbage collection.
      */
     bool gcFlag;
+
 };
 
 
@@ -318,7 +322,7 @@ class Peer : public Server {
     callRPC(Protocol::Raft::OpCode opCode,
             const google::protobuf::Message& request,
             google::protobuf::Message& response,
-            std::unique_lock<Mutex>& lockGuard);
+            std::unique_lock<Mutex>& lockGuard, uint64_t sendNode);
 
     /**
      * Launch this Peer's thread, which should run
@@ -473,6 +477,7 @@ class Peer : public Server {
     // Peer is not copyable.
     Peer(const Peer&) = delete;
     Peer& operator=(const Peer&) = delete;
+
 };
 
 /**
@@ -1162,6 +1167,9 @@ class RaftConsensus {
     friend std::ostream& operator<<(std::ostream& os,
                                     const RaftConsensus& raft);
 
+    // jef : send message to dmck
+    void resetSending();
+
   private:
     /**
      * See #state.
@@ -1415,7 +1423,9 @@ class RaftConsensus {
      * A follower waits for about this much inactivity before becoming a
      * candidate and starting a new election.
      */
-    const std::chrono::nanoseconds ELECTION_TIMEOUT;
+    // jef : hack election policy
+//    const std::chrono::nanoseconds ELECTION_TIMEOUT;
+    const std::chrono::milliseconds ELECTION_TIMEOUT;
 
     /**
      * A leader sends RPCs at least this often, even if there is no data to
@@ -1445,7 +1455,9 @@ class RaftConsensus {
      * - An advance state machine entry failed to commit (probably due to lost
      *   leadership).
      */
+    // Jef : Message Timing
     const std::chrono::nanoseconds STATE_MACHINE_UPDATER_BACKOFF;
+//    const std::chrono::milliseconds STATE_MACHINE_UPDATER_BACKOFF;
 
     /**
      * Prefer to keep RPC requests under this size.
@@ -1458,6 +1470,9 @@ class RaftConsensus {
      * This server's unique ID. Not available until init() is called.
      */
     uint64_t serverId;
+
+    // jef : send message to dmck
+    int msgSending;
 
     /**
      * The addresses that this server is listening on. Not available until

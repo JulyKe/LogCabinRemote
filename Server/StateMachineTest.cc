@@ -61,6 +61,7 @@ class ServerStateMachineTest : public ::testing::Test {
                 "}");
         consensus->init();
         consensus->append({&entry});
+        std::cout << "----new election?";
         consensus->startNewElection();
         consensus->configuration->localServer->lastSyncedIndex =
             consensus->log->getLastLogIndex();

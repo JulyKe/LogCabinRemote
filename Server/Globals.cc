@@ -27,6 +27,9 @@
 #include "Server/RaftService.h"
 #include "Server/StateMachine.h"
 
+//#include "Server/SAMCServer.cc" // jef : add SAMC Server
+
+
 namespace LogCabin {
 namespace Server {
 
@@ -45,6 +48,7 @@ Globals::ExitHandler::handleSignalEvent()
 {
     NOTICE("%s: shutting down", strsignal(signalNumber));
     eventLoop.exit();
+    EventInterceptor::exitNow();
 }
 
 Globals::LogRotateHandler::LogRotateHandler(
@@ -106,6 +110,8 @@ Globals::init()
     std::string uuid = config.read("clusterUUID", std::string(""));
     if (!uuid.empty())
         clusterUUID.set(uuid);
+
+    // jef : read serverId from configuration
     serverId = config.read<uint64_t>("serverId");
     Core::Debug::processName = Core::StringUtil::format("%lu", serverId);
     {
@@ -145,6 +151,7 @@ Globals::init()
                                    clientService,
                                    maxThreads);
 
+        // jef : read listenAddress from config
         std::string listenAddressesStr =
             config.read<std::string>("listenAddresses");
         {
@@ -157,6 +164,7 @@ Globals::init()
         if (listenAddresses.empty()) {
             EXIT("No server addresses specified to listen on");
         }
+
         for (auto it = listenAddresses.begin();
              it != listenAddresses.end();
              ++it) {
@@ -168,7 +176,7 @@ Globals::init()
                      address.toString().c_str(),
                      error.c_str());
             }
-            NOTICE("Serving on %s",
+            NOTICE("jef-3 Serving on %s",
                    address.toString().c_str());
         }
         raft->serverAddresses = listenAddressesStr;

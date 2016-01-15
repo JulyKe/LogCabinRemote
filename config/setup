@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+ALLSERVERS=127.0.0.1:5254,127.0.0.1:5255,127.0.0.1:5256
+/home/jeff/Programs/logcabin/build/Examples/Reconfigure --cluster=$ALLSERVERS set 127.0.0.1:5254 127.0.0.1:5255 127.0.0.1:5256

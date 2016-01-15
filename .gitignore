@@ -10,3 +10,6 @@
 /smoketest*.conf
 /smoketeststorage
 /storage
+/.idea
+/.project
+/.cproject
