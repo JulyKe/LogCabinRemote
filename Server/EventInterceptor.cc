@@ -11,14 +11,13 @@
 #include <Server/EventInterceptor.h>
 
 EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int eventMode,
-		int eventType, int counterSteadyState){
+		int eventType){
 	myNode = senderNode;
 	toNode = recvNode;
 	myStateInt = state;
 	myState = getStateString(myStateInt);
 	this->eventMode = eventMode;
 	this->eventType = eventType;
-	steadyStateThreshold = counterSteadyState;
 	eventId = getHash();
 	filename = "raft-" + std::to_string(eventId);
 	fileDir = getRPCDIR();
@@ -69,11 +68,6 @@ void EventInterceptor::commitEvent(){
 }
 
 void EventInterceptor::waitAck(){
-	// inform steady state to dmck
-	if(steadyStateThreshold == 2){
-//		informSteadyState();
-	}
-
 	// wait for ack msg
 	std::string ackFileName = fileDir + "/ack/" + std::to_string(eventId);
 	std::ifstream ackFile(ackFileName.c_str());

@@ -269,13 +269,8 @@ daemon = env.Program("build/LogCabin",
              object_files['RPC'] +
              object_files['Event'] +
              object_files['Core']),
-#             LIBS = ["pthread", "protobuf", "rt", "cryptopp"])
-			 # jef : add xmlrpc libraries (here and in /test/SConscript)
-             LIBS = ["xmlrpc_client++", "xmlrpc_client", "xmlrpc++",
-				"xmlrpc_util++", "xmlrpc", "xmlrpc_xmlparse", 
-				"xmlrpc_xmltok", "xmlrpc_util", "xmlrpc_packetsocket",
-				"pthread", "protobuf", "rt", "cryptopp", "curl", "jvm"],
-			 LIBPATH = ['/usr/local/bin', '/usr/lib/jvm/java-8-oracle/jre/lib/amd64/server'])
+             LIBS = ["pthread", "protobuf", "rt", "cryptopp"])
+
 env.Default(daemon)
 Repository('/usr/lib/jvm/java-8-oracle/include')
 Repository('/usr/lib/jvm/java-8-oracle/include/linux')

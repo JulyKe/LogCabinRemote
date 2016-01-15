@@ -16,7 +16,6 @@ private:
 	int eventType;
 	int myStateInt;
 	int eventId;
-	int steadyStateThreshold;
 	static bool isExit;
 
 private:
@@ -29,8 +28,7 @@ private:
 	int getHash();
 
 public:
-	EventInterceptor(int senderNode, int recvNode, int state, int eventMode, int eventType,
-			int counterSteadyState);
+	EventInterceptor(int senderNode, int recvNode, int state, int eventMode, int eventType);
 	EventInterceptor(int senderNode, int state);
 	static void exitNow();
 };

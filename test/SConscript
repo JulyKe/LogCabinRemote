@@ -45,13 +45,7 @@ testrunner = env.Program("test",
                  "#Storage",
                  "#Server",
              ], variant_dir='#build')),
-#            LIBS = [ "pthread", "protobuf", "rt", "cryptopp" ],
-			# jef : add xmlrpc libraries (here and in ../SConstruct)
-			LIBS = ["xmlrpc_client++", "xmlrpc_client", "xmlrpc++",
-				"xmlrpc_util++", "xmlrpc", "xmlrpc_xmlparse", 
-				"xmlrpc_xmltok", "xmlrpc_util", "xmlrpc_packetsocket",
-				"pthread", "protobuf", "rt", "cryptopp", "curl", "jvm"],
-			LIBPATH = ['/usr/local/bin', '/usr/lib/jvm/java-8-oracle/jre/lib/amd64/server'],
+            LIBS = [ "pthread", "protobuf", "rt", "cryptopp" ],
 			CPPPATH = env["CPPPATH"] + ["#gtest/include"],
             # -fno-access-control allows tests to access private members
             CXXFLAGS = env["CXXFLAGS"] + ["-fno-access-control"])

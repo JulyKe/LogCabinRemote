@@ -44,10 +44,6 @@
 #include <string>
 #include <iostream>
 
-//#include <xmlrpc-c/girerr.hpp>
-//#include <xmlrpc-c/base.hpp>
-//#include <xmlrpc-c/client_simple.hpp>
-
 #define PATH_SEPARATOR ':'
 
 namespace LogCabin {
@@ -61,7 +57,6 @@ bool startThreads = true;
 
 // jef : hack election policy
 bool startElection = true;
-uint64_t lastMsgType = 4;
 
 ////////// Server //////////
 
@@ -1011,7 +1006,6 @@ RaftConsensus::RaftConsensus(Globals& globals)
     , stateMachineUpdaterThread()
     , stepDownThread()
     , invariants(*this)
-	, msgSending(0) // jef : send msg to dmck
 {
 }
 
@@ -1944,12 +1938,6 @@ operator<<(std::ostream& os, const RaftConsensus& raft)
     return os;
 }
 
-// jef : send message to dmck
-void
-RaftConsensus::resetSending(){
-	msgSending = 0;
-}
-
 
 //// RaftConsensus private methods that MUST acquire the lock
 
@@ -2310,10 +2298,9 @@ RaftConsensus::appendEntries(std::unique_lock<Mutex>& lockGuard,
     uint64_t epoch = currentEpoch;
 
     // jef : send message type-2 to dmck
-    msgSending += 1;
     Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
     EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
-    		Protocol::Raft::OpCode::APPEND_ENTRIES, msgSending);
+    		Protocol::Raft::OpCode::APPEND_ENTRIES);
 
     std::unique_lock<Mutex> secondLockGuard(mutex);
     Peer::CallStatus status = peer.callRPC(
@@ -2460,10 +2447,9 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
     uint64_t epoch = currentEpoch;
 
     // jef : send message-3 to dmck
-    msgSending += 1;
     Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
     EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
-        		Protocol::Raft::OpCode::INSTALL_SNAPSHOT, msgSending);
+        		Protocol::Raft::OpCode::INSTALL_SNAPSHOT);
     std::unique_lock<Mutex> secondLockGuard(mutex);
 
     Peer::CallStatus status = peer.callRPC(
@@ -2819,10 +2805,9 @@ RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
 
 
     // jef : send message-1 to dmck
-    msgSending += 1;
 	Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
     EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
-            		Protocol::Raft::OpCode::REQUEST_VOTE, msgSending);
+            		Protocol::Raft::OpCode::REQUEST_VOTE);
 	std::unique_lock<Mutex> secondLockGuard(mutex);
 
     Peer::CallStatus status = peer.callRPC(
@@ -2924,7 +2909,7 @@ void
 RaftConsensus::startNewElection()
 {
 	// jef : intercept start new election event-0
-	EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, 2);
+	EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0);
 
     if (configuration->id == 0) {
         // Don't have a configuration: go back to sleep.
