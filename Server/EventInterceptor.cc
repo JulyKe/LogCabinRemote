@@ -37,7 +37,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	waitAck();
 }
 
-EventInterceptor::EventInterceptor(int senderNode, int state){
+EventInterceptor::EventInterceptor(int senderNode, int state, int currentTerm){
 	myNode = senderNode;
 	myStateInt = state;
 	myState = getStateString(myStateInt);
@@ -49,6 +49,7 @@ EventInterceptor::EventInterceptor(int senderNode, int state){
 	file << "sendNode=" << myNode << std::endl;
 	file << "sendNodeState=" << myState << std::endl;
 	file << "sendNodeStateInt=" << myStateInt << std::endl;
+	file << "currentTerm=" << currentTerm << std::endl;
 	file.close();
 
 	commitEvent();

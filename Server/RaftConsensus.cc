@@ -945,7 +945,7 @@ RaftConsensus::RaftConsensus(Globals& globals)
                 "electionTimeoutMilliseconds",
                   // jef : hack election policy
 //                500)))
-            	  20000)))
+            	  15000)))
     , HEARTBEAT_PERIOD(
         globals.config.keyExists("heartbeatPeriodMilliseconds")
             ? std::chrono::nanoseconds(
@@ -2525,7 +2525,7 @@ RaftConsensus::becomeLeader()
     state = State::LEADER;
 
     // jef: update state to dmck
-    EventInterceptor update(serverId, (int)state);
+    EventInterceptor update(serverId, (int)state, currentTerm);
 
     leaderId = serverId;
     printElectionState();
@@ -2935,7 +2935,7 @@ RaftConsensus::startNewElection()
     state = State::CANDIDATE;
 
     // jef: update state to dmck
-    EventInterceptor update(serverId, (int)state);
+    EventInterceptor update(serverId, (int)state, currentTerm);
 
     leaderId = 0;
     votedFor = serverId;
@@ -2972,7 +2972,7 @@ RaftConsensus::stepDown(uint64_t newTerm)
         state = State::FOLLOWER;
 
         // jef: update state to dmck
-        EventInterceptor update(serverId, (int)state);
+        EventInterceptor update(serverId, (int)state, currentTerm);
 
         printElectionState();
     } else {
@@ -2980,7 +2980,7 @@ RaftConsensus::stepDown(uint64_t newTerm)
             state = State::FOLLOWER;
 
             // jef: update state to dmck
-            EventInterceptor update(serverId, (int)state);
+            EventInterceptor update(serverId, (int)state, currentTerm);
 
             printElectionState();
         }

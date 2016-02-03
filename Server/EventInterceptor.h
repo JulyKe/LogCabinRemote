@@ -30,6 +30,6 @@ private:
 
 public:
 	EventInterceptor(int senderNode, int recvNode, int state, int eventMode, int eventType);
-	EventInterceptor(int senderNode, int state);
+	EventInterceptor(int senderNode, int state, int currentTerm);
 	static void exitNow();
 };
