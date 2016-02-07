@@ -44,6 +44,8 @@ EventInterceptor::EventInterceptor(int senderNode, int state, int currentTerm){
 	filename = "raftUpdate-" + std::to_string(myNode);
 	fileDir = getRPCDIR();
 
+	NOTICE("Node %d updates its state to %s at term %d", myNode, myState.c_str(), currentTerm);
+
 	std::string newFileName = fileDir + "/new/" + filename;
 	file.open(newFileName.c_str());
 	file << "sendNode=" << myNode << std::endl;

@@ -945,7 +945,7 @@ RaftConsensus::RaftConsensus(Globals& globals)
                 "electionTimeoutMilliseconds",
                   // jef : hack election policy
 //                500)))
-            	  15000)))
+            	  20000)))
     , HEARTBEAT_PERIOD(
         globals.config.keyExists("heartbeatPeriodMilliseconds")
             ? std::chrono::nanoseconds(
@@ -1298,7 +1298,7 @@ RaftConsensus::handleAppendEntries(
 
     // If the caller's term is stale, just return our term to it.
     if (request.term() < currentTerm) {
-        VERBOSE("Caller(%lu) is stale. Our term is %lu, theirs is %lu",
+        NOTICE("Caller(%lu) is stale. Our term is %lu, theirs is %lu",
                  request.server_id(), currentTerm, request.term());
         return; // response was set to a rejection above
     }
@@ -2525,6 +2525,7 @@ RaftConsensus::becomeLeader()
     state = State::LEADER;
 
     // jef: update state to dmck
+    NOTICE("--- becomeLeader ---");
     EventInterceptor update(serverId, (int)state, currentTerm);
 
     leaderId = serverId;
@@ -2935,6 +2936,7 @@ RaftConsensus::startNewElection()
     state = State::CANDIDATE;
 
     // jef: update state to dmck
+    NOTICE("--- startNewElection ---");
     EventInterceptor update(serverId, (int)state, currentTerm);
 
     leaderId = 0;
@@ -2957,6 +2959,7 @@ RaftConsensus::startNewElection()
 void
 RaftConsensus::stepDown(uint64_t newTerm)
 {
+	NOTICE("--- stepDown ---");
     assert(currentTerm <= newTerm);
     if (currentTerm < newTerm) {
         VERBOSE("stepDown(%lu)", newTerm);
@@ -2979,12 +2982,12 @@ RaftConsensus::stepDown(uint64_t newTerm)
         if (state != State::FOLLOWER) {
             state = State::FOLLOWER;
 
-            // jef: update state to dmck
-            EventInterceptor update(serverId, (int)state, currentTerm);
-
             printElectionState();
         }
     }
+    // jef: update state to dmck
+    EventInterceptor update(serverId, (int)state, currentTerm);
+
     if (startElectionAt == TimePoint::max()) // was leader
         setElectionTimer();
     if (withholdVotesUntil == TimePoint::max()) // was leader
