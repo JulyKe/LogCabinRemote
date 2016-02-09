@@ -2974,9 +2974,6 @@ RaftConsensus::stepDown(uint64_t newTerm)
         }
         state = State::FOLLOWER;
 
-        // jef: update state to dmck
-        EventInterceptor update(serverId, (int)state, currentTerm);
-
         printElectionState();
     } else {
         if (state != State::FOLLOWER) {
