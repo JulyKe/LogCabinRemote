@@ -15,6 +15,7 @@ private:
 	int eventMode;
 	int eventType;
 	int myStateInt;
+	int currentTerm;
 	int eventId;
 	static bool isExit;
 
@@ -29,7 +30,7 @@ private:
 	int getHash();
 
 public:
-	EventInterceptor(int senderNode, int recvNode, int state, int eventMode, int eventType);
+	EventInterceptor(int senderNode, int recvNode, int state, int eventMode, int eventType, int currentTerm);
 	EventInterceptor(int senderNode, int state, int currentTerm);
 	static void exitNow();
 };

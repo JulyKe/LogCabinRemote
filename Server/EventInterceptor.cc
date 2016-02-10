@@ -11,13 +11,14 @@
 #include <Server/EventInterceptor.h>
 
 EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int eventMode,
-		int eventType){
+		int eventType, int currentTerm){
 	myNode = senderNode;
 	toNode = recvNode;
 	myStateInt = state;
 	myState = getStateString(myStateInt);
 	this->eventMode = eventMode;
 	this->eventType = eventType;
+	this->currentTerm = currentTerm;
 	eventId = getHash();
 	fileDir = getRPCDIR();
 	filename = createFilename();
@@ -31,6 +32,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	file << "sendNodeState=" << myState << std::endl;
 	file << "sendNodeStateInt=" << myStateInt << std::endl;
 	file << "hashId=" << eventId << std::endl;
+	file << "currentTerm=" << this->currentTerm << std::endl;
 	file.close();
 
 	commitEvent();
@@ -167,13 +169,14 @@ std::string EventInterceptor::createFilename(){
 }
 
 int EventInterceptor::getHash(){
-	int prime = 31;
+	int prime = 19;
 	int hash = 1;
 	hash = prime * hash + myNode;
 	hash = prime * hash + toNode;
 	hash = prime * hash + myStateInt;
 	hash = prime * hash + eventMode;
 	hash = prime * hash + eventType;
+	hash = prime * hash + currentTerm;
 	return hash;
 }
 
