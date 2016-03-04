@@ -10,6 +10,7 @@
 #include <chrono>         // std::chrono::seconds
 #include <Server/EventInterceptor.h>
 
+// events
 EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int eventMode,
 		int eventType, int currentTerm){
 	myNode = senderNode;
@@ -39,6 +40,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	waitAck();
 }
 
+// update status
 EventInterceptor::EventInterceptor(int senderNode, int state, int currentTerm){
 	myNode = senderNode;
 	myStateInt = state;
@@ -137,6 +139,9 @@ std::string EventInterceptor::getStateString(int state){
 		case 2:
 			result = "LEADER";
 			break;
+		case 3:
+			result = "CLIENT";
+			break;
 	}
 	return result;
 }
@@ -156,14 +161,16 @@ std::string EventInterceptor::createFilename(){
 	int count = 0;
 	std::string filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
 	std::string filePath = fileDir + "/new/" + filename;
-	std::string filePath2 = fileDir + "/new/" + filename;
+	std::string filePath2 = fileDir + "/send/" + filename;
 	std::ifstream file(filePath.c_str());
 	std::ifstream file2(filePath2.c_str());
 	while(file.good() || file2.good()) {
 		count++;
 		filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
 		filePath = fileDir + "/new/" + filename;
+		filePath2 = fileDir + "/send/" + filename;
 		file.open(filePath.c_str());
+		file2.open(filePath2.c_str());
 	}
 	return filename;
 }

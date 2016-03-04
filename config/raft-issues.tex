@@ -54,29 +54,29 @@ t-upgrade : upgrading Logcabin version
 \#41 : t-low\\
 \#42 : t-low\\
 \#43 : t-low\\
-\#44 : t-LR\\
+\#44 : t-LR + paper figure 8 is interesting to understand deeper\\
 \#45 : t-low\\
 \#46 : t-low\\
-\#47 : t-config\\
+\#47 : t-config; not interesting\\
 \#48 : t-low\\
-\#49 : t-perf\\
-\#50 : t-hang; hangs in terminating a raft node; related with \#49\\
+\#49 : t-perf; not interesting\\
+\#50 : t-hang; hangs in terminating a raft node; related with \#49; not interesting\\
 \#51 : t-low\\
 \#52 : t-low\\
-\#53 : t-perf\\
+\#53 : t-perf; not interesting\\
 \#54 : t-low\\
 \#55 : t-low\\
-\#56 : t-config; adding new server while existing cluster is running\\
-\#57 : t-config; t-perf\\
+\#56 : t-config; adding new server while existing cluster is running; not interesting\\
+\#57 : t-config; t-perf; not interesting\\
 \#58 : t-low\\
 \#59 : t-low\\
 \#60 : t-low\\
 \#61 : t-low\\
-\#62 : t-perf; related with \#30\\
+\#62 : t-perf; related with \#30; not interesting\\
 \#63 : t-low\\
 \#64 : t-low\\
 \#65 : t-low\\
-\#66 : t-conf\\
+\#66 : t-conf; reconfiguration can cause a node to crash; not interesting for sequence of events\\
 \#67 : t-low\\
 \#68 : t-low\\
 \#69 : t-low\\
@@ -93,14 +93,14 @@ t-upgrade : upgrading Logcabin version
 \#80 : t-low\\
 \#81 : t-low\\
 \#82 : t-low\\
-\#83 : t-mem-leak\\
+\#83 : t-mem-leak; not interesting\\
 \#84 : t-low\\
 \#85 : t-low\\
 \#86 : t-low\\
 \#87 : t-low\\
 \#88 : t-low; merged with \#74\\
 \#89 : t-low\\
-\#90 : interesting bug\\
+\#90 : interesting bug - req:client has contacted the 1C\\
 The cluster time approximately tracks how long the cluster has been
 available with a working leader.\\
 Cluster time is measured in nanoseconds and progresses at about the same
@@ -118,10 +118,11 @@ That meant that if the SystemClock jumped forwards drastically, all clients
 would expire. That's undesirable, so cluster time was introduced in \#90
 ("make client session timeout use monotonic clock") to address this.\\
 Close \#90 (solution): make client session timeout use monotonic clock\\
-\#91 : t-low; A race in the unit test: server was replying before request came in.\\
+\#91 : t-low; A race in the unit test: server was replying before request came in; 
+it happens in unit test\\
 \#92 : t-low\\
 \#93 : t-low\\
-\#94 : t-config;\\
+\#94 : t-config; not interesting for sequence of events simulation\\
 We just encountered a cluster where clients weren't getting redirected to the leader 
 correctly. Followers were redirecting the leader to the wrong node. The cluster 
 was oddly configured (the server addresses were not in order), and due to \#47, the 
@@ -129,12 +130,12 @@ leader hint addresses were wrong. It would have been nice to spot that right awa
 from the ServerStats output.\\
 \#95 : t-low\\
 \#96 : t-low\\
-\#97 : t-LR; t-LE\\
-A follower timing out because it's taken too long to write to its own disk. If 
+\#97 : t-LR; t-LE; REQ: long time to write log in follower + LE-Timeout in follower to start LE\\
+A follower timing out because it's taken too long to write appendEntries to its own disk. If 
 so, can we solve that by simply moving the setElectionTimeout() call in 
 handleAppendEntries() lower, past the disk write? Meanwhile the follower holds 
 a mutex the entire time, so it won't start an election.\\
-\#98 : t-perf\\
+\#98 : t-perf; not interesting\\
 \#99 : t-low\\
 \#100 : t-low\\
 \#101 : t-low\\
@@ -143,14 +144,16 @@ a mutex the entire time, so it won't start an election.\\
 \#104 : t-low\\
 \#105 : t-low\\
 \#106 : t-low\\
-\#107 : t-LE\\
-jef : Big Data can trigger LE Timeout >> start LE\\
+\#107 : t-LE; more related to performance issue\\
+jef : new node state machine is way behind compares to the other nodes, yet it
+becomes a leader - availability will suffer for a long time, because the leader will
+first write the logs that it has missed;\\
 If the state machine is very far behind and the server is the leader, availability 
 suffers. This only really matters for large logs, when log replay time is 
 non-negligible. There'd be two parts to fixing this:\\
 1. Don't start new elections if your state machine is too far behind your 
 commitIndex.\\
-At least occasionally persist the commitIndex, so that it doesn't reset all the 
+2. At least occasionally persist the commitIndex, so that it doesn't reset all the 
 way to 0/lastSnapshotIndex on a reboot.\\
 \#108 : t-low\\
 \#109 : t-low\\
@@ -165,11 +168,11 @@ way to 0/lastSnapshotIndex on a reboot.\\
 \#118 : t-low\\
 \#119 : t-low\\
 \#120 : t-low\\
-\#121 : t-hang; local concurrency : child process deadlock\\
-\#122 : t-low; local concurrency detected manually\\
+\#121 : t-hang; local concurrency : child process deadlock; not interesting for sequence of events\\
+\#122 : t-low; local concurrency detected manually; not interesting for sequence of events\\
 \#123 : t-low\\
 \#124 : t-low\\
-\#125 : t-upgrade\\
+\#125 : t-upgrade; not interesting for sequence of events\\
 \#126 : t-low\\
 \#127 : t-low\\
 \#128 : t-low\\
@@ -188,7 +191,15 @@ way to 0/lastSnapshotIndex on a reboot.\\
 \#141 : t-low\\
 \#142 : t-low\\
 \#143 : t-low\\
-\#144 : t-hang; hang for 1 hour while exiting\\
+\#144 : t-hang; hang for 1 hour while exiting; local concurrency issue; 
+not interesting for sequence of events\\
+This was caused by an unsafe access to a bool exiting flag, which should
+have been protected by a mutex.\\
+I ran build/LogCabin --bootstrap against /dev/shm in a loop before this
+change, and it hung after the following number of iterations over 10
+runs: 957, 1476, 333, 125, 313, 935, 91, 188, 57, 762. After applying
+this change, it ran for over 35000 iterations without hanging (and then
+I stoppped it).\\
 \#145 : t-low\\
 \#146 : t-low\\
 \#147 : t-low\\
@@ -204,29 +215,32 @@ way to 0/lastSnapshotIndex on a reboot.\\
 \#157 : t-low\\
 \#158 : t-low\\
 \#159 : t-low\\
-\#160 : t-LR\\
+\#160 : t-LR; req : 2C + 1R + left far behind on the log (>1MB log)\\
 jeff : go to web to understand the bug\\
-\#161 : t-perf; t-LR\\
+cause data corruption and affect performance and availability issue\\
+\#161 : t-perf; t-LR; related to \#160\\
 \#162 : t-low\\
 \#163 : t-low\\
 \#164 : t-low\\
-\#165 : t-perf\\
+\#165 : t-perf; not interesting for sequence of events\\
 \#166 : t-low\\
 \#167 : t-low\\
 \#168 : t-low; related with \#160 and \#161\\
 \#169 : t-low\\
-\#170 : t-perf; high load cause bug\\
+\#170 : t-perf; high load cause bug; not interesting\\
 \#171 : t-low\\
 \#172 : t-low\\
-\#173 : t-lcrugs\\
-\#174 : t-LR\\
+\#173 : t-lcrugs; not interesting\\
+\#174 : t-LR; REQ: 1L -> installSnapshot -> 1F,
+F crashes and reboots while L is sending the snapshot; F will keep failing;
+hard to find\\
 From looking at the code, I think if a follower reboots while a leader 
 is sending it a snapshot, it won't reopen the partially written snapshot 
 file. The leader will keep retrying to send an InstallSnapshot request 
 with a byte offset in the middle of the file (greater than 1), and the 
 follower will keep panicking as a result. I don't see how this would 
 resolve itself until the leader steps down or the term changes.\\
-\#175 : dangling pointer\\
+\#175 : dangling pointer; not interesting\\
 The issue was that the destructor for ClientImpl calls
 ExactlyOnceRPCHelper.exit() which calls into LeaderRPC. Only in case of
 MockClientImpl, TreeLeaderRPC needed MockClientImpl to remain live, but
@@ -240,7 +254,7 @@ TestingCallbacks directly.
 \#180 : t-low\\
 \#181 : t-low\\
 \#182 : t-low\\
-\#183 : t-hang; t-LR\\
+\#183 : t-hang; t-LR; not interesting;\\
 the issue is that stepDown() changes the configuration 
 and then calls interruptAll(), so interruptAll() doesn't 
 actually interrupt the recently removed servers.\\
@@ -251,7 +265,7 @@ actually interrupt the recently removed servers.\\
 \#188 : t-low\\
 \#189 : t-low\\
 \#190 : t-low\\
-\#191 : t-CR\\
+\#191 : t-CR; unclear;\\
 Start a LogCabin server and kill it soon. Then restart it. 
 Cannot start up with the following error message: 
 2015-09-07 02:37:39.719750 Storage/SegmentedLog.cc:999 in 
@@ -269,15 +283,39 @@ know how to do.
 \#193 : t-low\\
 \#194 : t-low\\
 \#195 : t-conf; incomplete reset cause two nodes using the same server id\\
-\#196 : t-hang\\
+\#196 : t-hang; related with \#121; lcrugs - not interesting\\
 \#197 : t-low\\
-\#198 : scalability issue; logcabin abort after running out of file descriptors\\
+\#198 : scalability issue; logcabin abort after running out of file descriptors; not interesting\\
 \#199 : t-low\\
-\#200 : t-LE\\
+\#200 : t-LE; REQ: 1F has a long write --> LE Timeout is triggered in the 1F, even
+though 1L still exists\\
 If a disk write takes longer than the leader election timeout, a follower 
 can call for an election when the leader is still up doing fine.\\
 Quick fix suggested by diego is to reset the election timeout at the 
 end of handleAppendEntries.
 \#201 : continuation from \#200\\
 \#202 : related to \#200\\
---- DONE : 12/17/2015 ---
+\#203 : t-low\\
+\#204 : t-low\\
+\#205 : t-config; t-LE;\\
+@nhardt saw extended unavailability when removing servers 2 and 
+3 from a 3-server cluster. Server 3 was leader, and made the change, 
+but then it timed out and won an election. It correctly stepped down, 
+but then it timed out again. This repeated several times. It would be 
+better for Server 3 to remember that it's not part of the cluster 
+anymore.
+\#206 : t-low\\
+\#207 : t-low\\
+\#208 : t-hang; t-LR\\
+ClientImpl.cc misses a call to doneWithRPC() for keepalives that 
+have to be retried:
+https://github.com/logcabin/logcabin/blob/v1.1.0/Client/ClientImpl.cc#L397
+This caused the client's firstOutstandingRPC to get stuck, causing 
+servers to accumulate session state, write a corrupt snapshot 
+(SnapshotStateMachine protobuf got too large), then entering a 
+period of not being able to write snapshots (SnapshotStateMachine 
+protobuf got even larger).\\
+This is a critical bug that caused a production outage, since the snapshot 
+could not be read back in.
+\#209 : t-low\\
+--- DONE2 : 03/03/2016 ---

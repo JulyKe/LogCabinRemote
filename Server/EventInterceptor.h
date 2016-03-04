@@ -1,6 +1,9 @@
 #include <fstream>
 #include <iostream>
 
+#ifndef EVENTINTERCEPTOR_H_
+#define EVENTINTERCEPTOR_H_
+
 class EventInterceptor{
 private:
 	std::ifstream configFile;
@@ -34,3 +37,5 @@ public:
 	EventInterceptor(int senderNode, int state, int currentTerm);
 	static void exitNow();
 };
+
+#endif /* EVENTINTERCEPTOR_H_ */

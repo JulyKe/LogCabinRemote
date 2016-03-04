@@ -27,8 +27,6 @@
 #include "Server/RaftService.h"
 #include "Server/StateMachine.h"
 
-//#include "Server/SAMCServer.cc" // jef : add SAMC Server
-
 
 namespace LogCabin {
 namespace Server {

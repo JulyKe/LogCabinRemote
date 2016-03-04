@@ -25,6 +25,8 @@
 #include "RPC/ClientRPC.h"
 #include "RPC/ClientSession.h"
 
+#include "Client/ClientInterceptor.h"
+
 namespace LogCabin {
 namespace Client {
 
@@ -174,6 +176,10 @@ treeCall(LeaderRPCBase& leaderRPC,
     Protocol::Client::StateMachineCommand::Response cresponse;
     *crequest.mutable_tree() = request;
     LeaderRPC::Status status;
+
+    // jef : interception of client writing request
+    ClientInterceptor clientEvent(3, 3, 2, 0, 3, 0);
+
     if (request.exactly_once().client_id() == 0) {
         VERBOSE("Already timed out on establishing session for read-write "
                 "tree command");
@@ -773,6 +779,9 @@ ClientImpl::write(const std::string& path,
     request.mutable_write()->set_path(realPath);
     request.mutable_write()->set_contents(contents);
     Protocol::Client::ReadWriteTree::Response response;
+
+    // jef : intercept client write request
+
     treeCall(*leaderRPC,
              request, response, timeout);
     exactlyOnceRPCHelper.doneWithRPC(request.exactly_once());
