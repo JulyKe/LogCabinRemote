@@ -16,14 +16,14 @@ ClientInterceptor::ClientInterceptor(int sendNode, int recvNode, int eventMode, 
 	std::string newFileName = fileDir + "/new/" + filename;
 
 	file.open(newFileName.c_str());
-	file << "eventMode=2" << std::endl;
-	file << "sendNode=3" << std::endl;
-	file << "recvNode=3" << std::endl;
-	file << "eventType=0" << std::endl;
+	file << "eventMode=" << eventMode << std::endl;
+	file << "sendNode=" << sendNode << std::endl;
+	file << "recvNode=" << recvNode << std::endl;
+	file << "eventType=" << eventType << std::endl;
 	file << "sendNodeState=Client" << std::endl;
-	file << "sendNodeStateInt=3" << std::endl;
+	file << "sendNodeStateInt=" << sendState << std::endl;
 	file << "hashId=" << hashId << std::endl;
-	file << "currentTerm=0" << std::endl;
+	file << "currentTerm=" << term << std::endl;
 	file.close();
 
 	commitEvent();

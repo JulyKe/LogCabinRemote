@@ -178,7 +178,7 @@ treeCall(LeaderRPCBase& leaderRPC,
     LeaderRPC::Status status;
 
     // jef : interception of client writing request
-    ClientInterceptor clientEvent(3, 3, 2, 0, 3, 0);
+//    ClientInterceptor clientEvent(3, 3, 2, 0, 3, 0);
 
     if (request.exactly_once().client_id() == 0) {
         VERBOSE("Already timed out on establishing session for read-write "
@@ -481,8 +481,10 @@ ClientImpl::init(const std::string& hosts)
 void
 ClientImpl::initDerived()
 {
+	// jef : reproduce #174 - intercept client execution until a Leader is ready
+	// sendNode, recvNode, eventMode, eventType, sendState, term
+	ClientInterceptor clientEvent(3, 3, 2, 1, 4, 0);
     if (!leaderRPC) { // sometimes set in unit tests
-        NOTICE("Using server list: %s", hosts.c_str());
         leaderRPC.reset(new LeaderRPC(
             RPC::Address(hosts, Protocol::Common::DEFAULT_PORT),
             clusterUUID,

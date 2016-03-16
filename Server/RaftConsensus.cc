@@ -53,14 +53,17 @@ typedef Storage::Log Log;
 // jef : samc-logcabin configuration
 bool interceptLE = true;
 bool interceptLR = true;
-// jef : detect client request
-bool clientRequest = false;
+// jef : to detect log update
+bool logUpdate = false;
+// jef : reproduce #200 - to detect long log writing
+bool longTimeWritingInterception = false;
 
 namespace RaftConsensusInternal {
 
 bool startThreads = true;
 
 // jef : hack election policy
+//bool startElection = false;
 bool startElection = true;
 
 ////////// Server //////////
@@ -949,8 +952,8 @@ RaftConsensus::RaftConsensus(Globals& globals)
             globals.config.read<uint64_t>(
                 "electionTimeoutMilliseconds",
                   // jef : hack election policy
-//                500)))
-            	  20000)))
+                500)))
+//            	  12000)))
     , HEARTBEAT_PERIOD(
         globals.config.keyExists("heartbeatPeriodMilliseconds")
             ? std::chrono::nanoseconds(
@@ -1478,7 +1481,9 @@ RaftConsensus::handleInstallSnapshot(
         snapshotWriter.reset(
             new Storage::SnapshotFile::Writer(storageLayout));
     }
-    response.set_bytes_stored(snapshotWriter->getBytesWritten());
+
+    // jef : reproduce #174 -> comment this out
+//    response.set_bytes_stored(snapshotWriter->getBytesWritten());
 
     if (request.byte_offset() < snapshotWriter->getBytesWritten()) {
         WARNING("Ignoring stale snapshot chunk for byte offset %lu when the "
@@ -1488,10 +1493,24 @@ RaftConsensus::handleInstallSnapshot(
         return;
     }
     if (request.byte_offset() > snapshotWriter->getBytesWritten()) {
+    	// jef : reproduce #174 - replace WARNING with the PANIC
+    	/*
         WARNING("Leader tried to send snapshot chunk at byte offset %lu but "
                 "the next byte needed is %lu. Discarding the chunk.",
                 request.byte_offset(),
                 snapshotWriter->getBytesWritten());
+        */
+
+    	// jef : reproduce #174 - notify SAMC that the node will crash
+    	EventInterceptor update(serverId, 3, currentTerm);
+
+        PANIC("Leader tried to send snapshot chunk at byte offset %lu"
+				"but the next byte needed is %lu. It's supposed to send these in order.",
+				request.byte_offset(),
+				snapshotWriter->getBytesWritten());
+
+        // jef : reproduce #174 - comment this all out
+        /*
         if (!request.has_version() || request.version() < 2) {
             // For compatibility with InstallSnapshot version 1 leader: such a
             // leader assumes the InstallSnapshot RPC succeeded if the terms
@@ -1507,9 +1526,14 @@ RaftConsensus::handleInstallSnapshot(
             response.set_term(currentTerm);
         }
         return;
+        */
     }
     snapshotWriter->writeRaw(request.data().data(), request.data().length());
-    response.set_bytes_stored(snapshotWriter->getBytesWritten());
+
+    // jef : reproduce #174 - comment this out
+//    response.set_bytes_stored(snapshotWriter->getBytesWritten());
+
+    // jef : reproduce #174 : interception?
 
     if (request.done()) {
         if (request.last_snapshot_index() < lastSnapshotIndex) {
@@ -1599,7 +1623,7 @@ RaftConsensus::replicate(const Core::Buffer& operation)
     entry.set_data(operation.getData(), operation.getLength());
 
     // jef : detect client request for interception
-    clientRequest = true;
+    logUpdate = true;
 
     return replicateEntry(entry, lockGuard);
 }
@@ -2074,8 +2098,13 @@ RaftConsensus::timerThreadMain()
     while (!exiting) {
     	// jef : hack election policy
     	if (RaftConsensusInternal::startElection){
+    		// jef : intercept start new election eventMode:0 & eventType:0
+//			if(interceptLE){
+//				EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
+//			}
         	RaftConsensusInternal::startElection = false;
             startNewElection();
+//    	}
     	} else if (Clock::now() >= startElectionAt)
             startNewElection();
         stateChanged.wait_until(lockGuard, startElectionAt);
@@ -2251,6 +2280,14 @@ RaftConsensus::append(const std::vector<const Log::Entry*>& entries)
         std::unique_ptr<Log::Sync> sync = log->takeSync();
         sync->wait();
         log->syncComplete(std::move(sync));
+
+        // jef : reproduce bug #200, hold append execution in Follower node
+        if(state == State::FOLLOWER){
+        	// jef : intercept the append process to SAMC (eventMode: 0; eventType: 1) --> long writing log
+			if(longTimeWritingInterception){
+				EventInterceptor localEvent(serverId, serverId, (int)state, 0, 1, currentTerm);
+			}
+        }
     }
     uint64_t index = range.first;
     for (auto it = entries.begin(); it != entries.end(); ++it) {
@@ -2308,13 +2345,13 @@ RaftConsensus::appendEntries(std::unique_lock<Mutex>& lockGuard,
 
     // jef : send message type-2 to dmck
     Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
-    if(interceptLE && !clientRequest){
+    if(interceptLE && !logUpdate){
     	EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
 				Protocol::Raft::OpCode::APPEND_ENTRIES, currentTerm);
-    } else if(interceptLR && clientRequest){
-    	clientRequest = false;
-        NOTICE("-- There is a client request");
-        // jef : eventType=3 is for appendEntries with clientRequest update to peer nodes
+    } else if(interceptLR && logUpdate){
+    	logUpdate = false;
+        NOTICE("-- There is a log update");
+        // jef : eventType=3 is for appendEntries with logUpdate update to peer nodes
         EventInterceptor msg(serverId, peer.serverId, (int)state, 1, 3, currentTerm);
     }
 
@@ -2425,7 +2462,12 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
     Protocol::Raft::InstallSnapshot::Request request;
     request.set_server_id(serverId);
     request.set_term(currentTerm);
-    request.set_version(2);
+
+    // jef : reproduce #174 - to track install snapshot has been called or not
+    NOTICE("-- install snapshot");
+
+    // jef : reproduce #174 - comment this out
+//    request.set_version(2);
 
     // Open the latest snapshot if we haven't already. Stash a copy of the
     // lastSnapshotIndex that goes along with the file, since it's possible
@@ -2444,12 +2486,14 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
     request.set_last_snapshot_index(peer.lastSnapshotIndex);
     request.set_byte_offset(peer.snapshotFileOffset);
     uint64_t numDataBytes = 0;
+    uint64_t singleByte = 1; // jef : reproduce #174 - add this line
     if (!peer.suppressBulkData) {
         // The amount of data we can send is bounded by the remaining bytes in
         // the file and the maximum length for RPCs.
         numDataBytes = std::min(
             peer.snapshotFile->getFileLength() - peer.snapshotFileOffset,
-            SOFT_RPC_SIZE_LIMIT);
+//            SOFT_RPC_SIZE_LIMIT); // jef : reproduce #174 - replace this line with the line below
+        	singleByte);
     }
     request.set_data(peer.snapshotFile->get<char>(peer.snapshotFileOffset,
                                                   numDataBytes),
@@ -2506,7 +2550,14 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
         peer.lastAckEpoch = epoch;
         stateChanged.notify_all();
         peer.nextHeartbeatTime = start + HEARTBEAT_PERIOD;
+
+        // jef : reproduce #174 - add this line
+        peer.snapshotFileOffset += numDataBytes;
+
         peer.suppressBulkData = false;
+
+        // jef : reproduce #174 - comment the if else
+        /*
         if (response.has_bytes_stored()) {
             // Normal path (since InstallSnapshot version 2).
             peer.snapshotFileOffset = response.bytes_stored();
@@ -2516,7 +2567,10 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
             // appended to the file if the terms matched.
             peer.snapshotFileOffset += numDataBytes;
         }
-        if (peer.snapshotFileOffset == peer.snapshotFile->getFileLength()) {
+        */
+        // jef : reproduce #174 - replace if statement
+        if (request.done()) {
+//        if (peer.snapshotFileOffset == peer.snapshotFile->getFileLength()) {
             NOTICE("Done sending snapshot through index %lu to follower",
                    peer.lastSnapshotIndex);
             peer.matchIndex = peer.lastSnapshotIndex;
@@ -2929,12 +2983,12 @@ RaftConsensus::printElectionState() const
 void
 RaftConsensus::startNewElection()
 {
-	// jef : intercept start new election event-0
+	// jef : intercept new election event
 	if(interceptLE){
 		EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
 	}
 
-    if (configuration->id == 0) {
+	if (configuration->id == 0) {
         // Don't have a configuration: go back to sleep.
         setElectionTimer();
         return;
@@ -2976,6 +3030,7 @@ RaftConsensus::startNewElection()
     // if we're the only server, this election is already done
     if (configuration->quorumAll(&Server::haveVote))
         becomeLeader();
+
 }
 
 void
@@ -3001,9 +3056,13 @@ RaftConsensus::stepDown(uint64_t newTerm)
         if (state != State::FOLLOWER) {
             state = State::FOLLOWER;
 
+
             printElectionState();
         }
     }
+
+    // jef : enable another LE
+//    RaftConsensusInternal::startElection = true;
     // jef: update state to dmck
     EventInterceptor update(serverId, (int)state, currentTerm);
 
