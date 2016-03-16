@@ -140,7 +140,7 @@ std::string EventInterceptor::getStateString(int state){
 			result = "LEADER";
 			break;
 		case 3:
-			result = "CLIENT";
+			result = "HARD-CRASH";
 			break;
 	}
 	return result;
