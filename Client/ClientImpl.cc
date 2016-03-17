@@ -483,7 +483,7 @@ ClientImpl::initDerived()
 {
 	// jef : reproduce #174 - intercept client execution until a Leader is ready
 	// sendNode, recvNode, eventMode, eventType, sendState, term
-	ClientInterceptor clientEvent(3, 3, 2, 1, 4, 0);
+//	ClientInterceptor clientEvent(3, 3, 2, 1, 4, 0);
     if (!leaderRPC) { // sometimes set in unit tests
         leaderRPC.reset(new LeaderRPC(
             RPC::Address(hosts, Protocol::Common::DEFAULT_PORT),
