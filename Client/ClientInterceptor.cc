@@ -48,10 +48,10 @@ int ClientInterceptor::getHash(int sendNode, int recvNode, int eventMode, int ev
 
 std::string ClientInterceptor::getRPCDir(){
 	std::ifstream configFile;
+	configFile.open("/tmp/raft/target-sys.conf");
+	std::string prefix = "ipc_dir=";
 	std::string inputs;
 	std::string rpcdir;
-	std::string prefix = "ipc_dir=";
-	configFile.open("/tmp/raft/target-sys.conf");
 	if(configFile.is_open()){
 		while(getline (configFile, inputs)){
 			if(inputs.find(prefix) == 0){

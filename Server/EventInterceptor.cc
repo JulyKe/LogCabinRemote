@@ -153,10 +153,8 @@ std::string EventInterceptor::getRPCDIR(){
 	std::string rpcdir;
 	if(configFile.is_open()){
 		while(getline (configFile, inputs)){
-			NOTICE("[Jef] configFile line: %s", inputs.c_str());
 			if(inputs.find(prefix) == 0){
 				rpcdir = inputs;
-				NOTICE("[Jef] rpcdir line: %s", rpcdir.c_str());
 			}
 		}
 		configFile.close();
