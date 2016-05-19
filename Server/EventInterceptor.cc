@@ -147,14 +147,21 @@ std::string EventInterceptor::getStateString(int state){
 }
 
 std::string EventInterceptor::getRPCDIR(){
-	configFile.open("/home/jeff/Programs/logcabin/config/config");
-	prefix = "RPCDIR=";
+	configFile.open("/tmp/raft/target-sys.conf");
+	prefix = "ipc_dir=";
+	std::string inputs;
+	std::string rpcdir;
 	if(configFile.is_open()){
 		while(getline (configFile, inputs)){
+			NOTICE("[Jef] configFile line: %s", inputs.c_str());
+			if(inputs.find(prefix) == 0){
+				rpcdir = inputs;
+				NOTICE("[Jef] rpcdir line: %s", rpcdir.c_str());
+			}
 		}
 		configFile.close();
 	}
-	return inputs.substr(prefix.size());
+	return rpcdir.substr(prefix.size());
 }
 
 std::string EventInterceptor::createFilename(){

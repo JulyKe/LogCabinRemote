@@ -8,7 +8,6 @@ class EventInterceptor{
 private:
 	std::ifstream configFile;
 	std::ofstream file;
-	std::string inputs;
 	std::string fileDir;
 	std::string prefix;
 	std::string myState;
