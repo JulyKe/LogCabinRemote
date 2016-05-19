@@ -49,14 +49,18 @@ int ClientInterceptor::getHash(int sendNode, int recvNode, int eventMode, int ev
 std::string ClientInterceptor::getRPCDir(){
 	std::ifstream configFile;
 	std::string inputs;
-	std::string prefix = "RPCDIR=";
-	configFile.open("/home/jeff/Programs/logcabin/config/config");
+	std::string rpcdir;
+	std::string prefix = "ipc_dir=";
+	configFile.open("/tmp/raft/target-sys.conf");
 	if(configFile.is_open()){
 		while(getline (configFile, inputs)){
+			if(inputs.find(prefix) == 0){
+				rpcdir = inputs;
+			}
 		}
 		configFile.close();
 	}
-	return inputs.substr(prefix.size());
+	return rpcdir.substr(prefix.size());
 }
 
 std::string ClientInterceptor::getFilename(int hashId){
