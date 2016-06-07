@@ -31,34 +31,6 @@ CC_SRCS += \
 ../Core/Util.cc \
 ../Core/UtilTest.cc 
 
-CC_DEPS += \
-./Core/Buffer.d \
-./Core/BufferTest.d \
-./Core/Checksum.d \
-./Core/ChecksumTest.d \
-./Core/CompatHashTest.d \
-./Core/ConditionVariable.d \
-./Core/ConditionVariableTest.d \
-./Core/Config.d \
-./Core/ConfigTest.d \
-./Core/Debug.d \
-./Core/DebugTest.d \
-./Core/ProtoBuf.d \
-./Core/ProtoBufTest.d \
-./Core/Random.d \
-./Core/RandomTest.d \
-./Core/RollingStat.d \
-./Core/RollingStatTest.d \
-./Core/STLUtilTest.d \
-./Core/StringUtil.d \
-./Core/StringUtilTest.d \
-./Core/ThreadId.d \
-./Core/ThreadIdTest.d \
-./Core/Time.d \
-./Core/TimeTest.d \
-./Core/Util.d \
-./Core/UtilTest.d 
-
 OBJS += \
 ./Core/Buffer.o \
 ./Core/BufferTest.o \
@@ -86,6 +58,34 @@ OBJS += \
 ./Core/TimeTest.o \
 ./Core/Util.o \
 ./Core/UtilTest.o 
+
+CC_DEPS += \
+./Core/Buffer.d \
+./Core/BufferTest.d \
+./Core/Checksum.d \
+./Core/ChecksumTest.d \
+./Core/CompatHashTest.d \
+./Core/ConditionVariable.d \
+./Core/ConditionVariableTest.d \
+./Core/Config.d \
+./Core/ConfigTest.d \
+./Core/Debug.d \
+./Core/DebugTest.d \
+./Core/ProtoBuf.d \
+./Core/ProtoBufTest.d \
+./Core/Random.d \
+./Core/RandomTest.d \
+./Core/RollingStat.d \
+./Core/RollingStatTest.d \
+./Core/STLUtilTest.d \
+./Core/StringUtil.d \
+./Core/StringUtilTest.d \
+./Core/ThreadId.d \
+./Core/ThreadIdTest.d \
+./Core/Time.d \
+./Core/TimeTest.d \
+./Core/Util.d \
+./Core/UtilTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

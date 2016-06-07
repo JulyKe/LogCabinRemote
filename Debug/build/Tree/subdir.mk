@@ -3,13 +3,6 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CC_SRCS += \
-../build/Tree/ProtoBuf.cc \
-../build/Tree/ProtoBufTest.cc \
-../build/Tree/Snapshot.pb.cc \
-../build/Tree/Tree.cc \
-../build/Tree/TreeTest.cc 
-
 O_SRCS += \
 ../build/Tree/ProtoBuf.o \
 ../build/Tree/ProtoBufTest.o \
@@ -17,12 +10,12 @@ O_SRCS += \
 ../build/Tree/Tree.o \
 ../build/Tree/TreeTest.o 
 
-CC_DEPS += \
-./build/Tree/ProtoBuf.d \
-./build/Tree/ProtoBufTest.d \
-./build/Tree/Snapshot.pb.d \
-./build/Tree/Tree.d \
-./build/Tree/TreeTest.d 
+CC_SRCS += \
+../build/Tree/ProtoBuf.cc \
+../build/Tree/ProtoBufTest.cc \
+../build/Tree/Snapshot.pb.cc \
+../build/Tree/Tree.cc \
+../build/Tree/TreeTest.cc 
 
 OBJS += \
 ./build/Tree/ProtoBuf.o \
@@ -30,6 +23,13 @@ OBJS += \
 ./build/Tree/Snapshot.pb.o \
 ./build/Tree/Tree.o \
 ./build/Tree/TreeTest.o 
+
+CC_DEPS += \
+./build/Tree/ProtoBuf.d \
+./build/Tree/ProtoBufTest.d \
+./build/Tree/Snapshot.pb.d \
+./build/Tree/Tree.d \
+./build/Tree/TreeTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

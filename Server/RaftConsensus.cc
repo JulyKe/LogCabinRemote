@@ -52,9 +52,9 @@ namespace Server {
 typedef Storage::Log Log;
 // jef : samc-logcabin configuration
 bool interceptLE = true;
-bool interceptLR = true;
+bool interceptLR = false; // affect appendEntries interception
 // jef : to detect log update
-bool logUpdate = false;
+bool logUpdate = true;
 // jef : reproduce #200 - to detect long log writing
 bool longTimeWritingInterception = false;
 
@@ -2343,17 +2343,15 @@ RaftConsensus::appendEntries(std::unique_lock<Mutex>& lockGuard,
     TimePoint start = Clock::now();
     uint64_t epoch = currentEpoch;
 
-    // jef : send message type-2 to dmck
+    // design-doc: intercept event
     Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
-    if(interceptLE && !logUpdate){
-    	EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
-				Protocol::Raft::OpCode::APPEND_ENTRIES, currentTerm);
-    } else if(interceptLR && logUpdate){
+    if(interceptLR && logUpdate){
     	logUpdate = false;
         NOTICE("-- There is a log update");
-        // jef : eventType=3 is for appendEntries with logUpdate update to peer nodes
-        EventInterceptor msg(serverId, peer.serverId, (int)state, 1, 3, currentTerm);
+        // jef : eventType=4 is for appendEntries with logUpdate update to peer nodes
+        EventInterceptor msg(serverId, peer.serverId, (int)state, 1, 4, currentTerm);
     }
+    // design-doc: end of intercept event
 
     std::unique_lock<Mutex> secondLockGuard(mutex);
     Peer::CallStatus status = peer.callRPC(
@@ -2877,13 +2875,14 @@ RaftConsensus::requestVote(std::unique_lock<Mutex>& lockGuard, Peer& peer)
     uint64_t epoch = currentEpoch;
 
 
-    // jef : send message-1 to dmck
+    // design-doc: intercept event
 	Core::MutexUnlock<Mutex> unlockGuard(lockGuard);
 	if(interceptLE){
 		EventInterceptor msg(serverId, peer.serverId, (int)state, 1,
 						Protocol::Raft::OpCode::REQUEST_VOTE, currentTerm);
 	}
 	std::unique_lock<Mutex> secondLockGuard(mutex);
+	// design-doc: end of intercept event
 
     Peer::CallStatus status = peer.callRPC(
                 Protocol::Raft::OpCode::REQUEST_VOTE,

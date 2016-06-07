@@ -3,26 +3,6 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CC_SRCS += \
-../build/Storage/FilesystemUtil.cc \
-../build/Storage/FilesystemUtilTest.cc \
-../build/Storage/Layout.cc \
-../build/Storage/LayoutTest.cc \
-../build/Storage/Log.cc \
-../build/Storage/LogFactory.cc \
-../build/Storage/LogFactoryTest.cc \
-../build/Storage/MemoryLog.cc \
-../build/Storage/MemoryLogTest.cc \
-../build/Storage/SegmentedLog.cc \
-../build/Storage/SegmentedLog.pb.cc \
-../build/Storage/SegmentedLogTest.cc \
-../build/Storage/SimpleFileLog.cc \
-../build/Storage/SimpleFileLog.pb.cc \
-../build/Storage/SimpleFileLogTest.cc \
-../build/Storage/SnapshotFile.cc \
-../build/Storage/SnapshotFileTest.cc \
-../build/Storage/Tool.cc 
-
 O_SRCS += \
 ../build/Storage/FilesystemUtil.o \
 ../build/Storage/FilesystemUtilTest.o \
@@ -43,25 +23,25 @@ O_SRCS += \
 ../build/Storage/SnapshotFileTest.o \
 ../build/Storage/Tool.o 
 
-CC_DEPS += \
-./build/Storage/FilesystemUtil.d \
-./build/Storage/FilesystemUtilTest.d \
-./build/Storage/Layout.d \
-./build/Storage/LayoutTest.d \
-./build/Storage/Log.d \
-./build/Storage/LogFactory.d \
-./build/Storage/LogFactoryTest.d \
-./build/Storage/MemoryLog.d \
-./build/Storage/MemoryLogTest.d \
-./build/Storage/SegmentedLog.d \
-./build/Storage/SegmentedLog.pb.d \
-./build/Storage/SegmentedLogTest.d \
-./build/Storage/SimpleFileLog.d \
-./build/Storage/SimpleFileLog.pb.d \
-./build/Storage/SimpleFileLogTest.d \
-./build/Storage/SnapshotFile.d \
-./build/Storage/SnapshotFileTest.d \
-./build/Storage/Tool.d 
+CC_SRCS += \
+../build/Storage/FilesystemUtil.cc \
+../build/Storage/FilesystemUtilTest.cc \
+../build/Storage/Layout.cc \
+../build/Storage/LayoutTest.cc \
+../build/Storage/Log.cc \
+../build/Storage/LogFactory.cc \
+../build/Storage/LogFactoryTest.cc \
+../build/Storage/MemoryLog.cc \
+../build/Storage/MemoryLogTest.cc \
+../build/Storage/SegmentedLog.cc \
+../build/Storage/SegmentedLog.pb.cc \
+../build/Storage/SegmentedLogTest.cc \
+../build/Storage/SimpleFileLog.cc \
+../build/Storage/SimpleFileLog.pb.cc \
+../build/Storage/SimpleFileLogTest.cc \
+../build/Storage/SnapshotFile.cc \
+../build/Storage/SnapshotFileTest.cc \
+../build/Storage/Tool.cc 
 
 OBJS += \
 ./build/Storage/FilesystemUtil.o \
@@ -82,6 +62,26 @@ OBJS += \
 ./build/Storage/SnapshotFile.o \
 ./build/Storage/SnapshotFileTest.o \
 ./build/Storage/Tool.o 
+
+CC_DEPS += \
+./build/Storage/FilesystemUtil.d \
+./build/Storage/FilesystemUtilTest.d \
+./build/Storage/Layout.d \
+./build/Storage/LayoutTest.d \
+./build/Storage/Log.d \
+./build/Storage/LogFactory.d \
+./build/Storage/LogFactoryTest.d \
+./build/Storage/MemoryLog.d \
+./build/Storage/MemoryLogTest.d \
+./build/Storage/SegmentedLog.d \
+./build/Storage/SegmentedLog.pb.d \
+./build/Storage/SegmentedLogTest.d \
+./build/Storage/SimpleFileLog.d \
+./build/Storage/SimpleFileLog.pb.d \
+./build/Storage/SimpleFileLogTest.d \
+./build/Storage/SnapshotFile.d \
+./build/Storage/SnapshotFileTest.d \
+./build/Storage/Tool.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

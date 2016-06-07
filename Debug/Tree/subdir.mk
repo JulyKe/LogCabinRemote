@@ -9,17 +9,17 @@ CC_SRCS += \
 ../Tree/Tree.cc \
 ../Tree/TreeTest.cc 
 
-CC_DEPS += \
-./Tree/ProtoBuf.d \
-./Tree/ProtoBufTest.d \
-./Tree/Tree.d \
-./Tree/TreeTest.d 
-
 OBJS += \
 ./Tree/ProtoBuf.o \
 ./Tree/ProtoBufTest.o \
 ./Tree/Tree.o \
 ./Tree/TreeTest.o 
+
+CC_DEPS += \
+./Tree/ProtoBuf.d \
+./Tree/ProtoBufTest.d \
+./Tree/Tree.d \
+./Tree/TreeTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

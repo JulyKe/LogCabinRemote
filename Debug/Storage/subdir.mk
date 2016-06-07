@@ -21,24 +21,6 @@ CC_SRCS += \
 ../Storage/SnapshotFileTest.cc \
 ../Storage/Tool.cc 
 
-CC_DEPS += \
-./Storage/FilesystemUtil.d \
-./Storage/FilesystemUtilTest.d \
-./Storage/Layout.d \
-./Storage/LayoutTest.d \
-./Storage/Log.d \
-./Storage/LogFactory.d \
-./Storage/LogFactoryTest.d \
-./Storage/MemoryLog.d \
-./Storage/MemoryLogTest.d \
-./Storage/SegmentedLog.d \
-./Storage/SegmentedLogTest.d \
-./Storage/SimpleFileLog.d \
-./Storage/SimpleFileLogTest.d \
-./Storage/SnapshotFile.d \
-./Storage/SnapshotFileTest.d \
-./Storage/Tool.d 
-
 OBJS += \
 ./Storage/FilesystemUtil.o \
 ./Storage/FilesystemUtilTest.o \
@@ -56,6 +38,24 @@ OBJS += \
 ./Storage/SnapshotFile.o \
 ./Storage/SnapshotFileTest.o \
 ./Storage/Tool.o 
+
+CC_DEPS += \
+./Storage/FilesystemUtil.d \
+./Storage/FilesystemUtilTest.d \
+./Storage/Layout.d \
+./Storage/LayoutTest.d \
+./Storage/Log.d \
+./Storage/LogFactory.d \
+./Storage/LogFactoryTest.d \
+./Storage/MemoryLog.d \
+./Storage/MemoryLogTest.d \
+./Storage/SegmentedLog.d \
+./Storage/SegmentedLogTest.d \
+./Storage/SimpleFileLog.d \
+./Storage/SimpleFileLogTest.d \
+./Storage/SnapshotFile.d \
+./Storage/SnapshotFileTest.d \
+./Storage/Tool.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

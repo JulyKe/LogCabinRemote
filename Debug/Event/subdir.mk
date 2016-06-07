@@ -13,16 +13,6 @@ CC_SRCS += \
 ../Event/Timer.cc \
 ../Event/TimerTest.cc 
 
-CC_DEPS += \
-./Event/File.d \
-./Event/FileTest.d \
-./Event/Loop.d \
-./Event/LoopTest.d \
-./Event/Signal.d \
-./Event/SignalTest.d \
-./Event/Timer.d \
-./Event/TimerTest.d 
-
 OBJS += \
 ./Event/File.o \
 ./Event/FileTest.o \
@@ -32,6 +22,16 @@ OBJS += \
 ./Event/SignalTest.o \
 ./Event/Timer.o \
 ./Event/TimerTest.o 
+
+CC_DEPS += \
+./Event/File.d \
+./Event/FileTest.d \
+./Event/Loop.d \
+./Event/LoopTest.d \
+./Event/Signal.d \
+./Event/SignalTest.d \
+./Event/Timer.d \
+./Event/TimerTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

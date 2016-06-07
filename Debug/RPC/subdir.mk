@@ -28,31 +28,6 @@ CC_SRCS += \
 ../RPC/ThreadDispatchService.cc \
 ../RPC/ThreadDispatchServiceTest.cc 
 
-CC_DEPS += \
-./RPC/Address.d \
-./RPC/AddressTest.d \
-./RPC/ClientRPC.d \
-./RPC/ClientRPCTest.d \
-./RPC/ClientServerTest.d \
-./RPC/ClientSession.d \
-./RPC/ClientSessionTest.d \
-./RPC/MessageSocket.d \
-./RPC/MessageSocketTest.d \
-./RPC/OpaqueClientRPC.d \
-./RPC/OpaqueClientRPCTest.d \
-./RPC/OpaqueServer.d \
-./RPC/OpaqueServerRPC.d \
-./RPC/OpaqueServerRPCTest.d \
-./RPC/OpaqueServerTest.d \
-./RPC/Protocol.d \
-./RPC/Server.d \
-./RPC/ServerRPC.d \
-./RPC/ServerRPCTest.d \
-./RPC/ServerTest.d \
-./RPC/ServiceMock.d \
-./RPC/ThreadDispatchService.d \
-./RPC/ThreadDispatchServiceTest.d 
-
 OBJS += \
 ./RPC/Address.o \
 ./RPC/AddressTest.o \
@@ -77,6 +52,31 @@ OBJS += \
 ./RPC/ServiceMock.o \
 ./RPC/ThreadDispatchService.o \
 ./RPC/ThreadDispatchServiceTest.o 
+
+CC_DEPS += \
+./RPC/Address.d \
+./RPC/AddressTest.d \
+./RPC/ClientRPC.d \
+./RPC/ClientRPCTest.d \
+./RPC/ClientServerTest.d \
+./RPC/ClientSession.d \
+./RPC/ClientSessionTest.d \
+./RPC/MessageSocket.d \
+./RPC/MessageSocketTest.d \
+./RPC/OpaqueClientRPC.d \
+./RPC/OpaqueClientRPCTest.d \
+./RPC/OpaqueServer.d \
+./RPC/OpaqueServerRPC.d \
+./RPC/OpaqueServerRPCTest.d \
+./RPC/OpaqueServerTest.d \
+./RPC/Protocol.d \
+./RPC/Server.d \
+./RPC/ServerRPC.d \
+./RPC/ServerRPCTest.d \
+./RPC/ServerTest.d \
+./RPC/ServiceMock.d \
+./RPC/ThreadDispatchService.d \
+./RPC/ThreadDispatchServiceTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

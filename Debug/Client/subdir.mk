@@ -9,6 +9,7 @@ CC_SRCS += \
 ../Client/Client.cc \
 ../Client/ClientImpl.cc \
 ../Client/ClientImplTest.cc \
+../Client/ClientInterceptor.cc \
 ../Client/ClientTest.cc \
 ../Client/LeaderRPC.cc \
 ../Client/LeaderRPCMock.cc \
@@ -21,30 +22,13 @@ CC_SRCS += \
 ../Client/Util.cc \
 ../Client/UtilTest.cc 
 
-CC_DEPS += \
-./Client/Backoff.d \
-./Client/BackoffTest.d \
-./Client/Client.d \
-./Client/ClientImpl.d \
-./Client/ClientImplTest.d \
-./Client/ClientTest.d \
-./Client/LeaderRPC.d \
-./Client/LeaderRPCMock.d \
-./Client/LeaderRPCTest.d \
-./Client/MockClientImpl.d \
-./Client/MockClientImplTest.d \
-./Client/ServerControl.d \
-./Client/SessionManager.d \
-./Client/SessionManagerTest.d \
-./Client/Util.d \
-./Client/UtilTest.d 
-
 OBJS += \
 ./Client/Backoff.o \
 ./Client/BackoffTest.o \
 ./Client/Client.o \
 ./Client/ClientImpl.o \
 ./Client/ClientImplTest.o \
+./Client/ClientInterceptor.o \
 ./Client/ClientTest.o \
 ./Client/LeaderRPC.o \
 ./Client/LeaderRPCMock.o \
@@ -56,6 +40,25 @@ OBJS += \
 ./Client/SessionManagerTest.o \
 ./Client/Util.o \
 ./Client/UtilTest.o 
+
+CC_DEPS += \
+./Client/Backoff.d \
+./Client/BackoffTest.d \
+./Client/Client.d \
+./Client/ClientImpl.d \
+./Client/ClientImplTest.d \
+./Client/ClientInterceptor.d \
+./Client/ClientTest.d \
+./Client/LeaderRPC.d \
+./Client/LeaderRPCMock.d \
+./Client/LeaderRPCTest.d \
+./Client/MockClientImpl.d \
+./Client/MockClientImplTest.d \
+./Client/ServerControl.d \
+./Client/SessionManager.d \
+./Client/SessionManagerTest.d \
+./Client/Util.d \
+./Client/UtilTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

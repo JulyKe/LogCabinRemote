@@ -10,7 +10,6 @@ CC_SRCS += \
 ../Server/EventInterceptor.cc \
 ../Server/Globals.cc \
 ../Server/GlobalsTest.cc \
-../Server/JNICaller.cc \
 ../Server/Main.cc \
 ../Server/RaftConsensus.cc \
 ../Server/RaftConsensusInvariants.cc \
@@ -21,24 +20,6 @@ CC_SRCS += \
 ../Server/StateMachine.cc \
 ../Server/StateMachineTest.cc 
 
-CC_DEPS += \
-./Server/ClientService.d \
-./Server/ClientServiceTest.d \
-./Server/ControlService.d \
-./Server/EventInterceptor.d \
-./Server/Globals.d \
-./Server/GlobalsTest.d \
-./Server/JNICaller.d \
-./Server/Main.d \
-./Server/RaftConsensus.d \
-./Server/RaftConsensusInvariants.d \
-./Server/RaftConsensusTest.d \
-./Server/RaftService.d \
-./Server/ServerStats.d \
-./Server/ServerStatsTest.d \
-./Server/StateMachine.d \
-./Server/StateMachineTest.d 
-
 OBJS += \
 ./Server/ClientService.o \
 ./Server/ClientServiceTest.o \
@@ -46,7 +27,6 @@ OBJS += \
 ./Server/EventInterceptor.o \
 ./Server/Globals.o \
 ./Server/GlobalsTest.o \
-./Server/JNICaller.o \
 ./Server/Main.o \
 ./Server/RaftConsensus.o \
 ./Server/RaftConsensusInvariants.o \
@@ -56,6 +36,23 @@ OBJS += \
 ./Server/ServerStatsTest.o \
 ./Server/StateMachine.o \
 ./Server/StateMachineTest.o 
+
+CC_DEPS += \
+./Server/ClientService.d \
+./Server/ClientServiceTest.d \
+./Server/ControlService.d \
+./Server/EventInterceptor.d \
+./Server/Globals.d \
+./Server/GlobalsTest.d \
+./Server/Main.d \
+./Server/RaftConsensus.d \
+./Server/RaftConsensusInvariants.d \
+./Server/RaftConsensusTest.d \
+./Server/RaftService.d \
+./Server/ServerStats.d \
+./Server/ServerStatsTest.d \
+./Server/StateMachine.d \
+./Server/StateMachineTest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

@@ -6,11 +6,11 @@
 CC_SRCS += \
 ../test/TestRunner.cc 
 
-CC_DEPS += \
-./test/TestRunner.d 
-
 OBJS += \
 ./test/TestRunner.o 
+
+CC_DEPS += \
+./test/TestRunner.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

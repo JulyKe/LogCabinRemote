@@ -12,15 +12,6 @@ CC_SRCS += \
 ../Examples/SmokeTest.cc \
 ../Examples/TreeOps.cc 
 
-CC_DEPS += \
-./Examples/Benchmark.d \
-./Examples/FailoverTest.d \
-./Examples/HelloWorld.d \
-./Examples/Reconfigure.d \
-./Examples/ReconfigureTest.d \
-./Examples/SmokeTest.d \
-./Examples/TreeOps.d 
-
 OBJS += \
 ./Examples/Benchmark.o \
 ./Examples/FailoverTest.o \
@@ -29,6 +20,15 @@ OBJS += \
 ./Examples/ReconfigureTest.o \
 ./Examples/SmokeTest.o \
 ./Examples/TreeOps.o 
+
+CC_DEPS += \
+./Examples/Benchmark.d \
+./Examples/FailoverTest.d \
+./Examples/HelloWorld.d \
+./Examples/Reconfigure.d \
+./Examples/ReconfigureTest.d \
+./Examples/SmokeTest.d \
+./Examples/TreeOps.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

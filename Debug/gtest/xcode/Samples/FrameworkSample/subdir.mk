@@ -7,13 +7,13 @@ CC_SRCS += \
 ../gtest/xcode/Samples/FrameworkSample/widget.cc \
 ../gtest/xcode/Samples/FrameworkSample/widget_test.cc 
 
-CC_DEPS += \
-./gtest/xcode/Samples/FrameworkSample/widget.d \
-./gtest/xcode/Samples/FrameworkSample/widget_test.d 
-
 OBJS += \
 ./gtest/xcode/Samples/FrameworkSample/widget.o \
 ./gtest/xcode/Samples/FrameworkSample/widget_test.o 
+
+CC_DEPS += \
+./gtest/xcode/Samples/FrameworkSample/widget.d \
+./gtest/xcode/Samples/FrameworkSample/widget_test.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

@@ -3,18 +3,18 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CC_SRCS += \
-../build/test/TestRunner.cc 
-
 O_SRCS += \
 ../build/test/TestRunner.o \
 ../build/test/gtest-all.o 
 
-CC_DEPS += \
-./build/test/TestRunner.d 
+CC_SRCS += \
+../build/test/TestRunner.cc 
 
 OBJS += \
 ./build/test/TestRunner.o 
+
+CC_DEPS += \
+./build/test/TestRunner.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

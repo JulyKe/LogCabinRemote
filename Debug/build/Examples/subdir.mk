@@ -3,15 +3,6 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CC_SRCS += \
-../build/Examples/Benchmark.cc \
-../build/Examples/FailoverTest.cc \
-../build/Examples/HelloWorld.cc \
-../build/Examples/Reconfigure.cc \
-../build/Examples/ReconfigureTest.cc \
-../build/Examples/SmokeTest.cc \
-../build/Examples/TreeOps.cc 
-
 O_SRCS += \
 ../build/Examples/Benchmark.o \
 ../build/Examples/FailoverTest.o \
@@ -21,14 +12,14 @@ O_SRCS += \
 ../build/Examples/SmokeTest.o \
 ../build/Examples/TreeOps.o 
 
-CC_DEPS += \
-./build/Examples/Benchmark.d \
-./build/Examples/FailoverTest.d \
-./build/Examples/HelloWorld.d \
-./build/Examples/Reconfigure.d \
-./build/Examples/ReconfigureTest.d \
-./build/Examples/SmokeTest.d \
-./build/Examples/TreeOps.d 
+CC_SRCS += \
+../build/Examples/Benchmark.cc \
+../build/Examples/FailoverTest.cc \
+../build/Examples/HelloWorld.cc \
+../build/Examples/Reconfigure.cc \
+../build/Examples/ReconfigureTest.cc \
+../build/Examples/SmokeTest.cc \
+../build/Examples/TreeOps.cc 
 
 OBJS += \
 ./build/Examples/Benchmark.o \
@@ -38,6 +29,15 @@ OBJS += \
 ./build/Examples/ReconfigureTest.o \
 ./build/Examples/SmokeTest.o \
 ./build/Examples/TreeOps.o 
+
+CC_DEPS += \
+./build/Examples/Benchmark.d \
+./build/Examples/FailoverTest.d \
+./build/Examples/HelloWorld.d \
+./build/Examples/Reconfigure.d \
+./build/Examples/ReconfigureTest.d \
+./build/Examples/SmokeTest.d \
+./build/Examples/TreeOps.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

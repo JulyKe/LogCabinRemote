@@ -14,17 +14,6 @@ CC_SRCS += \
 ../gtest/src/gtest.cc \
 ../gtest/src/gtest_main.cc 
 
-CC_DEPS += \
-./gtest/src/gtest-all.d \
-./gtest/src/gtest-death-test.d \
-./gtest/src/gtest-filepath.d \
-./gtest/src/gtest-port.d \
-./gtest/src/gtest-printers.d \
-./gtest/src/gtest-test-part.d \
-./gtest/src/gtest-typed-test.d \
-./gtest/src/gtest.d \
-./gtest/src/gtest_main.d 
-
 OBJS += \
 ./gtest/src/gtest-all.o \
 ./gtest/src/gtest-death-test.o \
@@ -35,6 +24,17 @@ OBJS += \
 ./gtest/src/gtest-typed-test.o \
 ./gtest/src/gtest.o \
 ./gtest/src/gtest_main.o 
+
+CC_DEPS += \
+./gtest/src/gtest-all.d \
+./gtest/src/gtest-death-test.d \
+./gtest/src/gtest-filepath.d \
+./gtest/src/gtest-port.d \
+./gtest/src/gtest-printers.d \
+./gtest/src/gtest-test-part.d \
+./gtest/src/gtest-typed-test.d \
+./gtest/src/gtest.d \
+./gtest/src/gtest_main.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

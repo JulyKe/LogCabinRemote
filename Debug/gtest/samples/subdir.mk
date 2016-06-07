@@ -18,21 +18,6 @@ CC_SRCS += \
 ../gtest/samples/sample8_unittest.cc \
 ../gtest/samples/sample9_unittest.cc 
 
-CC_DEPS += \
-./gtest/samples/sample1.d \
-./gtest/samples/sample10_unittest.d \
-./gtest/samples/sample1_unittest.d \
-./gtest/samples/sample2.d \
-./gtest/samples/sample2_unittest.d \
-./gtest/samples/sample3_unittest.d \
-./gtest/samples/sample4.d \
-./gtest/samples/sample4_unittest.d \
-./gtest/samples/sample5_unittest.d \
-./gtest/samples/sample6_unittest.d \
-./gtest/samples/sample7_unittest.d \
-./gtest/samples/sample8_unittest.d \
-./gtest/samples/sample9_unittest.d 
-
 OBJS += \
 ./gtest/samples/sample1.o \
 ./gtest/samples/sample10_unittest.o \
@@ -47,6 +32,21 @@ OBJS += \
 ./gtest/samples/sample7_unittest.o \
 ./gtest/samples/sample8_unittest.o \
 ./gtest/samples/sample9_unittest.o 
+
+CC_DEPS += \
+./gtest/samples/sample1.d \
+./gtest/samples/sample10_unittest.d \
+./gtest/samples/sample1_unittest.d \
+./gtest/samples/sample2.d \
+./gtest/samples/sample2_unittest.d \
+./gtest/samples/sample3_unittest.d \
+./gtest/samples/sample4.d \
+./gtest/samples/sample4_unittest.d \
+./gtest/samples/sample5_unittest.d \
+./gtest/samples/sample6_unittest.d \
+./gtest/samples/sample7_unittest.d \
+./gtest/samples/sample8_unittest.d \
+./gtest/samples/sample9_unittest.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
