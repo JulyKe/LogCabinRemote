@@ -11,7 +11,7 @@
 
 ClientInterceptor::ClientInterceptor(int sendNode, int recvNode, int eventMode, int eventType, int sendState, int term){
 	int hashId = getHash(sendNode, recvNode, eventMode, eventType, sendState, term);
-	fileDir = getRPCDir();
+	fileDir = getIPCDir();
 	filename = getFilename(hashId);
 	std::string newFileName = fileDir + "/new/" + filename;
 
@@ -46,21 +46,21 @@ int ClientInterceptor::getHash(int sendNode, int recvNode, int eventMode, int ev
 	return hash;
 }
 
-std::string ClientInterceptor::getRPCDir(){
+std::string ClientInterceptor::getIPCDir(){
 	std::ifstream configFile;
 	configFile.open("/tmp/raft/target-sys.conf");
 	std::string prefix = "ipc_dir=";
 	std::string inputs;
-	std::string rpcdir;
+	std::string ipcdir;
 	if(configFile.is_open()){
 		while(getline (configFile, inputs)){
 			if(inputs.find(prefix) == 0){
-				rpcdir = inputs;
+				ipcdir = inputs;
 			}
 		}
 		configFile.close();
 	}
-	return rpcdir.substr(prefix.size());
+	return ipcdir.substr(prefix.size());
 }
 
 std::string ClientInterceptor::getFilename(int hashId){

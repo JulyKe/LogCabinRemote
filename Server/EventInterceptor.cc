@@ -21,7 +21,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	this->eventType = eventType;
 	this->currentTerm = currentTerm;
 	eventId = getHash();
-	fileDir = getRPCDIR();
+	fileDir = getIPCDIR();
 	filename = createFilename();
 
 	std::string newFileName = fileDir + "/new/" + filename;
@@ -46,7 +46,7 @@ EventInterceptor::EventInterceptor(int senderNode, int state, int currentTerm){
 	myStateInt = state;
 	myState = getStateString(myStateInt);
 	filename = "raftUpdate-" + std::to_string(myNode);
-	fileDir = getRPCDIR();
+	fileDir = getIPCDIR();
 
 	NOTICE("Node %d updates its state to %s at term %d", myNode, myState.c_str(), currentTerm);
 
@@ -146,20 +146,20 @@ std::string EventInterceptor::getStateString(int state){
 	return result;
 }
 
-std::string EventInterceptor::getRPCDIR(){
+std::string EventInterceptor::getIPCDIR(){
 	configFile.open("/tmp/raft/target-sys.conf");
 	prefix = "ipc_dir=";
 	std::string inputs;
-	std::string rpcdir;
+	std::string ipcdir;
 	if(configFile.is_open()){
 		while(getline (configFile, inputs)){
 			if(inputs.find(prefix) == 0){
-				rpcdir = inputs;
+				ipcdir = inputs;
 			}
 		}
 		configFile.close();
 	}
-	return rpcdir.substr(prefix.size());
+	return ipcdir.substr(prefix.size());
 }
 
 std::string EventInterceptor::createFilename(){

@@ -6,12 +6,6 @@
 
 class EventInterceptor{
 private:
-	std::ifstream configFile;
-	std::ofstream file;
-	std::string fileDir;
-	std::string prefix;
-	std::string myState;
-	std::string filename;
 	int myNode;
 	int toNode;
 	int eventMode;
@@ -20,6 +14,12 @@ private:
 	int currentTerm;
 	int eventId;
 	static bool isExit;
+	std::ifstream configFile;
+	std::ofstream file;
+	std::string fileDir;
+	std::string prefix;
+	std::string myState;
+	std::string filename;
 
 private:
 	void commitEvent();
@@ -27,7 +27,7 @@ private:
 	void informSteadyState();
 	void updateState();
 	std::string getStateString(int state);
-	std::string getRPCDIR();
+	std::string getIPCDIR();
 	std::string createFilename();
 	int getHash();
 

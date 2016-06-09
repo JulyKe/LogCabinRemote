@@ -20,7 +20,7 @@ private:
 
 private:
 	int getHash(int sendNode, int recvNode, int eventMode, int eventType, int sendState, int term);
-	std::string getRPCDir();
+	std::string getIPCDir();
 	std::string getFilename(int hashId);
 	void commitEvent();
 	void waitAck();
