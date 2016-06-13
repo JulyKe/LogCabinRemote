@@ -2350,6 +2350,9 @@ RaftConsensus::appendEntries(std::unique_lock<Mutex>& lockGuard,
         NOTICE("-- There is a log update");
         // jef : eventType=4 is for appendEntries with logUpdate update to peer nodes
         EventInterceptor msg(serverId, peer.serverId, (int)state, 1, 4, currentTerm);
+    } else {
+    	// jef : eventType=2
+        EventInterceptor msg(serverId, peer.serverId, (int)state, 1, Protocol::Raft::OpCode::APPEND_ENTRIES, currentTerm);
     }
     // design-doc: end of intercept-events
 
@@ -3036,11 +3039,12 @@ RaftConsensus::startNewElection()
 void
 RaftConsensus::stepDown(uint64_t newTerm)
 {
-	NOTICE("--- stepDown ---");
+	NOTICE("--- stepDown currentTerm:%lu, newTerm:%lu ---", currentTerm, newTerm);
     assert(currentTerm <= newTerm);
     if (currentTerm < newTerm) {
         VERBOSE("stepDown(%lu)", newTerm);
         currentTerm = newTerm;
+        NOTICE("[JEFF] update currentTerm to %lu", currentTerm);
         leaderId = 0;
         votedFor = 0;
         updateLogMetadata();
@@ -3053,6 +3057,7 @@ RaftConsensus::stepDown(uint64_t newTerm)
 
         printElectionState();
     } else {
+        NOTICE("[JEFF] no update on currentTerm: %lu", currentTerm);
         if (state != State::FOLLOWER) {
             state = State::FOLLOWER;
 
