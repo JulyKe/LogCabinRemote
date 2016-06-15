@@ -23,6 +23,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	eventId = getHash();
 	fileDir = getIPCDIR();
 	filename = createFilename();
+	samcResponse = false;
 
 	std::string newFileName = fileDir + "/new/" + filename;
 	file.open(newFileName.c_str());
@@ -59,6 +60,10 @@ EventInterceptor::EventInterceptor(int senderNode, int state, int currentTerm){
 	commitEvent();
 }
 
+bool EventInterceptor::getSAMCResponse(){
+	return samcResponse;
+}
+
 void EventInterceptor::exitNow(){
 	isExit = true;
 }
@@ -91,12 +96,15 @@ void EventInterceptor::waitAck(){
 	}
 
 	// read message file if needed
-	ackFile.open(ackFileName.c_str());
+	std::ifstream readAckFile(ackFileName.c_str());
 	std::string ackMessage = "";
-	if(ackFile.is_open()){
-		while(getline (ackFile, ackMessage)){
+	if(readAckFile.is_open()){
+		while(getline (readAckFile, ackMessage)){
+			if(ackMessage.find("execute=true") != std::string::npos){
+				samcResponse = true;
+			}
 		}
-		ackFile.close();
+		readAckFile.close();
 	}
 	NOTICE("[Jef] ack file %s/ack/%s %s", fileDir.c_str(), filename.c_str(), ackMessage.c_str());
 
@@ -161,7 +169,10 @@ std::string EventInterceptor::getIPCDIR(){
 }
 
 std::string EventInterceptor::createFilename(){
-	int count = 0;
+	auto ms = std::chrono::duration_cast< std::chrono::milliseconds >(
+		std::chrono::system_clock::now().time_since_epoch()
+	);
+	int count = ms.count() % 100000;
 	std::string filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
 	std::string filePath = fileDir + "/new/" + filename;
 	std::string filePath2 = fileDir + "/send/" + filename;

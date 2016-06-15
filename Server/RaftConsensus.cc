@@ -2097,16 +2097,15 @@ RaftConsensus::timerThreadMain()
     Core::ThreadId::setName("startNewElection");
     while (!exiting) {
     	// jef : hack election policy
-    	if (RaftConsensusInternal::startElection){
-    		// jef : intercept start new election eventMode:0 & eventType:0
-//			if(interceptLE){
-//				EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
-//			}
-        	RaftConsensusInternal::startElection = false;
+    	// jef : intercept new election event
+    	if(interceptLE){
+			EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
+			if(localEvent.getSAMCResponse()){
+				startNewElection();
+			}
+    	} else if (Clock::now() >= startElectionAt){
             startNewElection();
-//    	}
-    	} else if (Clock::now() >= startElectionAt)
-            startNewElection();
+    	}
         stateChanged.wait_until(lockGuard, startElectionAt);
     }
 }
@@ -2986,11 +2985,6 @@ RaftConsensus::printElectionState() const
 void
 RaftConsensus::startNewElection()
 {
-	// jef : intercept new election event
-	if(interceptLE){
-		EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
-	}
-
 	if (configuration->id == 0) {
         // Don't have a configuration: go back to sleep.
         setElectionTimer();

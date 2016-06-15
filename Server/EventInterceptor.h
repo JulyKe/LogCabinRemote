@@ -20,6 +20,7 @@ private:
 	std::string prefix;
 	std::string myState;
 	std::string filename;
+	bool samcResponse;
 
 private:
 	void commitEvent();
@@ -34,6 +35,7 @@ private:
 public:
 	EventInterceptor(int senderNode, int recvNode, int state, int eventMode, int eventType, int currentTerm);
 	EventInterceptor(int senderNode, int state, int currentTerm);
+	bool getSAMCResponse();
 	static void exitNow();
 };
 
