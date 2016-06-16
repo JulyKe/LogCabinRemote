@@ -52,6 +52,8 @@ namespace Server {
 typedef Storage::Log Log;
 // jef : samc-logcabin configuration
 bool interceptLE = true;
+int leInterval = 20;
+int leIntervalCounter = 20;
 bool interceptLR = false; // affect appendEntries interception
 // jef : to detect log update
 bool logUpdate = true;
@@ -2099,9 +2101,14 @@ RaftConsensus::timerThreadMain()
     	// jef : hack election policy
     	// jef : intercept new election event
     	if(interceptLE){
-			EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
-			if(localEvent.getSAMCResponse()){
-				startNewElection();
+    		if(leIntervalCounter < leInterval){
+				leIntervalCounter++;
+			} else {
+				leIntervalCounter = 0;
+				EventInterceptor localEvent(serverId, serverId, (int)state, 0, 0, currentTerm);
+				if(localEvent.getSAMCResponse()){
+					startNewElection();
+				}
 			}
     	} else if (Clock::now() >= startElectionAt){
             startNewElection();
