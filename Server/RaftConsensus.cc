@@ -2493,7 +2493,7 @@ RaftConsensus::installSnapshot(std::unique_lock<Mutex>& lockGuard,
     request.set_last_snapshot_index(peer.lastSnapshotIndex);
     request.set_byte_offset(peer.snapshotFileOffset);
     uint64_t numDataBytes = 0;
-    uint64_t singleByte = 1; // jef : reproduce #174 - add this line
+    uint64_t singleByte = 8; // jef : reproduce #174 - add this line
     if (!peer.suppressBulkData) {
         // The amount of data we can send is bounded by the remaining bytes in
         // the file and the maximum length for RPCs.
