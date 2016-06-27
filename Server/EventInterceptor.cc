@@ -33,7 +33,7 @@ EventInterceptor::EventInterceptor(int senderNode, int recvNode, int state, int 
 	file << "eventType=" << this->eventType << std::endl;
 	file << "sendNodeState=" << myState << std::endl;
 	file << "sendNodeStateInt=" << myStateInt << std::endl;
-	file << "hashId=" << eventId << std::endl;
+	file << "eventId=" << eventId << std::endl;
 	file << "currentTerm=" << this->currentTerm << std::endl;
 	file.close();
 
@@ -174,18 +174,6 @@ std::string EventInterceptor::createFilename(){
 	);
 	int count = ms.count() % 100000;
 	std::string filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
-	std::string filePath = fileDir + "/new/" + filename;
-	std::string filePath2 = fileDir + "/send/" + filename;
-	std::ifstream file(filePath.c_str());
-	std::ifstream file2(filePath2.c_str());
-	while(file.good() || file2.good()) {
-		count++;
-		filename = "raft-" + std::to_string(eventId) + "-" + std::to_string(count);
-		filePath = fileDir + "/new/" + filename;
-		filePath2 = fileDir + "/send/" + filename;
-		file.open(filePath.c_str());
-		file2.open(filePath2.c_str());
-	}
 	return filename;
 }
 

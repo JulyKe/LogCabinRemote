@@ -10,9 +10,9 @@
 #include <chrono>         // std::chrono::seconds
 
 ClientInterceptor::ClientInterceptor(int sendNode, int recvNode, int eventMode, int eventType, int sendState, int term){
-	int hashId = getHash(sendNode, recvNode, eventMode, eventType, sendState, term);
+	int eventId = getHash(sendNode, recvNode, eventMode, eventType, sendState, term);
 	fileDir = getIPCDir();
-	filename = getFilename(hashId);
+	filename = getFilename(eventId);
 	std::string newFileName = fileDir + "/new/" + filename;
 
 	file.open(newFileName.c_str());
@@ -22,7 +22,7 @@ ClientInterceptor::ClientInterceptor(int sendNode, int recvNode, int eventMode, 
 	file << "eventType=" << eventType << std::endl;
 	file << "sendNodeState=Client" << std::endl;
 	file << "sendNodeStateInt=" << sendState << std::endl;
-	file << "hashId=" << hashId << std::endl;
+	file << "eventId=" << eventId << std::endl;
 	file << "currentTerm=" << term << std::endl;
 	file.close();
 
@@ -64,20 +64,11 @@ std::string ClientInterceptor::getIPCDir(){
 }
 
 std::string ClientInterceptor::getFilename(int hashId){
-	int count = 0;
+	auto ms = std::chrono::duration_cast< std::chrono::milliseconds >(
+			std::chrono::system_clock::now().time_since_epoch()
+		);
+	int count = ms.count() % 100000;
 	std::string filename = "raft-" + std::to_string(hashId) + "-" + std::to_string(count);
-	std::string filePath = fileDir + "/new/" + filename;
-	std::string filePath2 = fileDir + "/send/" + filename;
-	std::ifstream file(filePath.c_str());
-	std::ifstream file2(filePath2.c_str());
-	while(file.good() || file2.good()) {
-		count++;
-		filename = "raft-" + std::to_string(hashId) + "-" + std::to_string(count);
-		filePath = fileDir + "/new/" + filename;
-		filePath2 = fileDir + "/send/" + filename;
-		file.open(filePath.c_str());
-		file2.open(filePath2.c_str());
-	}
 	return filename;
 }
 
