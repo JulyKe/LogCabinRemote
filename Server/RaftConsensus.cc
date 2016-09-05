@@ -1535,8 +1535,6 @@ RaftConsensus::handleInstallSnapshot(
     // jef : reproduce #174 - comment this out
 //    response.set_bytes_stored(snapshotWriter->getBytesWritten());
 
-    // jef : reproduce #174 : interception?
-
     if (request.done()) {
         if (request.last_snapshot_index() < lastSnapshotIndex) {
             WARNING("The leader sent us a snapshot, but it's stale: it only "

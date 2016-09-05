@@ -5,6 +5,7 @@ t-hang : Hangs
 t-CR : Crash Recovery issues
 t-LE : Leader Election issues
 t-LR : Log Replication issues
+t-SC : Scalability / Elasticity issues
 t-low : test bugs, debugging, developer logs, software development, minor bugs, documentation, duplicated issue
 t-mem-leak : memory leak
 t-perf : abnormal cpu-usage
@@ -318,4 +319,29 @@ protobuf got even larger).\\
 This is a critical bug that caused a production outage, since the snapshot 
 could not be read back in.
 \#209 : t-low\\
---- DONE2 : 03/03/2016 ---
+\#210 : t-SC\\
+closely related with \#205 where they try to remove 2 nodes and
+then add 1 old node back with 1 new node. Elasticity issue\\
+\#211 : t-low\\
+\#212 : t-low\\
+\#213 : t-hang; t-lcrug\\
+hang happens in flockfile.
+\#214 : t-low\\
+\#215 : t-LE; t-SC\\
+Quoted : a leader that has just left the cluster can win an
+election. it will step down so this is just a temporary
+situation but it can cause extended outages under
+[certain configurations]. with this change, a server
+will detect that it has written itself out of the
+cluster and will not run for election.\\
+Related with \#205\\
+\#216 : related to \#213\\
+\#217 : t-low\\
+\#218 : t-low\\
+\#219 : t-lcrug\\
+re-usage of pid in a single machine can
+cause a going to start logcabin detected as already running
+\#220 : related with \#219\\
+\#221 : t-CR\\
+explained the \#191 in detail.
+--- DONE3 : 08/25/2016 ---
