@@ -51,12 +51,12 @@ namespace Server {
 
 typedef Storage::Log Log;
 // jef : samc-logcabin configuration
-bool interceptLE = true;
+bool interceptLE = false;
 int leInterval = 20;
 int leIntervalCounter = 20;
 bool interceptLR = false; // affect appendEntries interception
 // jef : to detect log update
-bool logUpdate = true;
+bool logUpdate = false;
 // jef : reproduce #200 - to detect long log writing
 bool longTimeWritingInterception = false;
 
