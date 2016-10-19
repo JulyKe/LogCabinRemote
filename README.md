@@ -298,3 +298,4 @@ All commits should pass the pre-commit hooks. Enable them to run before each
 commit:
 
     ln -s ../../hooks/pre-commit .git/hooks/pre-commit
+# LogCabinRemote
