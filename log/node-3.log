@@ -1,0 +1,2 @@
+2016-10-19 18:14:33.688258 Server/Main.cc:304 in main() NOTICE[23883:evloop]: jef-1 Using config file ./config/logcabin-3.conf
+2016-10-19 18:14:33.688407 Server/Main.cc:366 in main() ERROR[23883:evloop]: Fatal exception from config file: The config file ./config/logcabin-3.conf could not be opened
